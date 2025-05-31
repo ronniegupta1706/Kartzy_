@@ -1,0 +1,55 @@
+
+const mongoose = require('mongoose');
+//creating a product schema
+const productSchema=new mongoose.Schema({
+    name:{
+        type:String,
+        required:true,
+    },
+    price:{
+        type:Number,
+        required:true,
+    },
+    description:{
+        type:String,
+        rrquired:true,
+    },
+    image:
+    {
+        type:String,
+        required:true,
+    },
+    category:{
+        type:String,
+        required:true,
+    },
+    brand:{
+        type:String,
+        required:true,
+    },
+    countInStock:{
+        type:Number,
+        required:true,
+        default:0,
+    },
+    rating:{
+        type:Number,
+        required:true,
+        default:0,
+    },
+    numreviews:{
+        type:Number,
+        required:true,
+        default:0},
+    },{
+        timestamps:true //this will add createdAt and updatedAt fields to the schema
+    }
+);
+
+//creating product model
+
+const Product=mongoose.model('Product',productSchema);
+
+//exporting the product model
+module.exports=Product;
+
