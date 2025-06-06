@@ -5,7 +5,7 @@ const mongoose=require('mongoose');
 const app=express();
 
 
-app.use(cors());
+app.use(cors());  //middleware call
 app.use(express.json());
 
 app.get('/',(req,res)=>{
