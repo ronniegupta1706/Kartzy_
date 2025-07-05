@@ -1,6 +1,5 @@
+import mongoose from 'mongoose';
 
-const mongoose = require('mongoose');
-//creating a product schema
 const productSchema=new mongoose.Schema({
     name:{
         type:String,
@@ -50,6 +49,4 @@ const productSchema=new mongoose.Schema({
 
 const Product=mongoose.model('Product',productSchema);
 
-//exporting the product model
-module.exports=Product;
-
+export default Product;
