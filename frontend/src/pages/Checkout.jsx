@@ -1,31 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const Checkout = () => {
   const { cartItems, dispatch } = useCart();
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("userInfo"));
-  const addressKey = `addresses_${user?.email}`;
+  const location = useLocation();
 
+  const [user, setUser] = useState(null);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState('');
   const [newAddress, setNewAddress] = useState({ label: '', details: '' });
   const [showNewAddress, setShowNewAddress] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('');
 
-  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  // 🔁 Get mode: either single item or full cart
+  const { mode, singleItem } = location.state || {};
+  const itemsToOrder = mode === 'single' && singleItem ? [singleItem] : cartItems;
+
+  const subtotal = itemsToOrder.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const shipping = subtotal < 500 ? 70 : 0;
   const total = subtotal + shipping;
 
   useEffect(() => {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    if (!userInfo || !userInfo.token) {
+      toast.error('Please login first');
+      navigate('/login');
+      return;
+    }
+
+    setUser(userInfo);
+    const addressKey = `addresses_${userInfo.email}`;
     const saved = JSON.parse(localStorage.getItem(addressKey)) || [];
     setAddresses(saved);
     if (saved.length) setSelectedAddress(saved[0].details);
-  }, []);
+  }, [navigate]);
 
   const handleAddNewAddress = () => {
+    if (!newAddress.label || !newAddress.details) {
+      toast.error('Please enter both label and address');
+      return;
+    }
+
+    const addressKey = `addresses_${user.email}`;
     const updated = [...addresses, newAddress];
     setAddresses(updated);
     localStorage.setItem(addressKey, JSON.stringify(updated));
@@ -34,30 +53,64 @@ const Checkout = () => {
     setShowNewAddress(false);
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!selectedAddress || !paymentMethod) {
       toast.error("Please select address and payment method");
       return;
     }
 
-    const userOrdersKey = `orders_${user.email}`;
-    const prevOrders = JSON.parse(localStorage.getItem(userOrdersKey)) || [];
+    try {
+      const res = await fetch("http://localhost:5001/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({
+          orderItems: itemsToOrder.map(item => ({
+            name: item.name,
+            qty: item.quantity,
+            image: item.image,
+            price: item.price,
+            product: item._id,
+          })),
+          shippingAddress: {
+            address: selectedAddress,
+            city: "City",
+            postalCode: "000000",
+            country: "India",
+          },
+          paymentMethod,
+          totalPrice: total,
+        }),
+      });
 
-    const newOrder = {
-      id: `ORD-${Date.now()}`,
-      date: new Date().toLocaleString(),
-      items: cartItems,
-      address: selectedAddress,
-      payment: paymentMethod,
-      total,
-      status: 'Placed'
-    };
+      const contentType = res.headers.get("content-type");
+      if (!res.ok) {
+        if (contentType?.includes("application/json")) {
+          const data = await res.json();
+          throw new Error(data.message);
+        } else {
+          const text = await res.text();
+          console.error("Non-JSON error:", text);
+          throw new Error("Server error (non-JSON)");
+        }
+      }
 
-    const updatedOrders = [...prevOrders, newOrder];
-    localStorage.setItem(userOrdersKey, JSON.stringify(updatedOrders));
-    dispatch({ type: 'CLEAR_CART' });
-    toast.success("Order placed successfully!");
-    navigate('/orders');
+      // ✅ Clear full cart or just one item depending on mode
+      if (mode === 'single' && singleItem) {
+        dispatch({ type: 'REMOVE_FROM_CART', payload: singleItem._id });
+      } else {
+        dispatch({ type: 'CLEAR_CART' });
+      }
+
+      toast.success("Order placed successfully!");
+      navigate("/orders");
+
+    } catch (error) {
+      console.error("Order error:", error);
+      toast.error(error.message || "Failed to place order");
+    }
   };
 
   return (
@@ -79,10 +132,7 @@ const Checkout = () => {
               <strong>{addr.label}:</strong> {addr.details}
             </label>
           ))}
-          <button
-            className="text-blue-600 mt-2"
-            onClick={() => setShowNewAddress(!showNewAddress)}
-          >
+          <button className="text-blue-600 mt-2" onClick={() => setShowNewAddress(!showNewAddress)}>
             {showNewAddress ? 'Cancel' : 'Add New Address'}
           </button>
 
@@ -101,10 +151,7 @@ const Checkout = () => {
                 onChange={e => setNewAddress({ ...newAddress, details: e.target.value })}
                 className="border px-2 py-1 w-full rounded"
               />
-              <button
-                onClick={handleAddNewAddress}
-                className="bg-blue-600 text-white px-4 py-1 rounded"
-              >
+              <button onClick={handleAddNewAddress} className="bg-blue-600 text-white px-4 py-1 rounded">
                 Save Address
               </button>
             </div>
@@ -132,32 +179,23 @@ const Checkout = () => {
       {/* Right: Summary */}
       <div className="w-full md:w-1/3 bg-white p-4 shadow rounded">
         <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
-        {cartItems.map(item => (
-          <div key={item._id} className="mb-2">
-            <div className="flex justify-between">
-              <span>{item.title} x {item.quantity}</span>
-              <span>₹{item.price * item.quantity}</span>
-            </div>
+        {itemsToOrder.map(item => (
+          <div key={item._id} className="mb-2 flex justify-between">
+            <span>{item.title} x {item.quantity}</span>
+            <span>₹{item.price * item.quantity}</span>
           </div>
         ))}
         <hr className="my-2" />
         <div className="flex justify-between text-sm">
-          <span>Subtotal</span>
-          <span>₹{subtotal}</span>
+          <span>Subtotal</span><span>₹{subtotal}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span>Shipping</span>
-          <span>{shipping > 0 ? `₹${shipping}` : 'Free'}</span>
+          <span>Shipping</span><span>{shipping ? `₹${shipping}` : "Free"}</span>
         </div>
         <div className="flex justify-between font-bold text-lg mt-2">
-          <span>Total</span>
-          <span>₹{total}</span>
+          <span>Total</span><span>₹{total}</span>
         </div>
-
-        <button
-          onClick={handlePlaceOrder}
-          className="w-full bg-green-600 text-white py-2 rounded mt-4 hover:bg-green-700"
-        >
+        <button onClick={handlePlaceOrder} className="w-full bg-green-600 text-white py-2 rounded mt-4 hover:bg-green-700">
           Place Order
         </button>
       </div>

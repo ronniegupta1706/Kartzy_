@@ -8,7 +8,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import Product from './models/Product.js';
 import userRoutes from './routes/userRoutes.js'; // ⬅️ Add this if you have it
-
+import orderRoutes from './routes/orderRoutes.js'; // ⬅️ Add this if you have it
 dotenv.config();
 const app = express();
 
@@ -18,6 +18,8 @@ app.use('/images', express.static('images'));
 
 // Routes
 app.use('/api/users', userRoutes); // ⬅️ if added
+
+app.use('/api/orders', orderRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running');

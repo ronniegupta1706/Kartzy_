@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Cart = () => {
   const { cartItems, dispatch } = useCart();
+  const navigate = useNavigate();
 
-  // Save cart to localStorage for persistence
   useEffect(() => {
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
   }, [cartItems]);
@@ -28,8 +29,31 @@ const Cart = () => {
   };
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const shipping= subtotal <500 ? 70:0; // Free shipping for orders above ₹500
+  const shipping = subtotal < 500 ? 70 : 0;
   const total = subtotal + shipping;
+
+  const handleBuyNow = (item) => {
+    navigate('/checkout', {
+      state: {
+        singleItem: item,
+        mode: 'single',
+      },
+    });
+  };
+
+  const handlePlaceAllOrders = () => {
+    if (cartItems.length === 0) {
+      toast.error('Your cart is empty');
+      return;
+    }
+
+    navigate('/checkout', {
+      state: {
+        fullCart: cartItems,
+        mode: 'all',
+      },
+    });
+  };
 
   return (
     <div className="p-6">
@@ -77,14 +101,16 @@ const Cart = () => {
                 >
                   Remove
                 </button>
-                <button className="bg-green-500 text-white px-3 py-1 rounded mt-2 block">
+                <button
+                  onClick={() => handleBuyNow(item)}
+                  className="bg-green-500 text-white px-3 py-1 rounded mt-2 block"
+                >
                   Buy Now
                 </button>
               </div>
             </div>
           ))}
 
-          {/* Total Summary */}
           <div className="mt-6 p-4 bg-gray-100 rounded shadow-md">
             <h3 className="text-xl font-semibold mb-2">Price Summary</h3>
             <p className="text-gray-700">Subtotal: ₹{subtotal.toFixed(2)}</p>
@@ -92,6 +118,13 @@ const Cart = () => {
               Shipping: ₹{shipping > 0 ? shipping.toFixed(2) : 'Free'}
             </p>
             <p className="font-bold text-lg mt-2">Total: ₹{total.toFixed(2)}</p>
+
+            <button
+              onClick={handlePlaceAllOrders}
+              className="mt-4 bg-blue-600 text-white px-6 py-2 rounded shadow"
+            >
+              Place All Orders
+            </button>
           </div>
         </>
       )}
