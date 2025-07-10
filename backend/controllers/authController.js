@@ -1,3 +1,4 @@
+import { isAdmin } from '../middleware/authMiddleware.js';
 import User from '../models/User.js';
 import generateToken from '../utils/generateToken.js';
 
@@ -40,6 +41,7 @@ export const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         phone: user.phone,
+        isAdmin: user.isAdmin,
         token: generateToken(user._id),
       });
     } else {

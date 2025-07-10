@@ -18,27 +18,27 @@ const Orders = () => {
     setUser(userInfo);
   }, [navigate]);
 
+  const fetchOrders = async () => {
+    try {
+      const res = await fetch('http://localhost:5001/api/orders/myorders', {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to fetch orders");
+
+      setOrders(data);
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+      toast.error(err.message || "Failed to fetch orders");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const res = await fetch('http://localhost:5001/api/orders/myorders', {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Failed to fetch orders");
-
-        setOrders(data);
-      } catch (err) {
-        console.error("Error fetching orders:", err);
-        toast.error(err.message || "Failed to fetch orders");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (user?.token) {
       fetchOrders();
     }
@@ -49,7 +49,16 @@ const Orders = () => {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">My Orders</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">My Orders</h2>
+        <button
+          onClick={fetchOrders}
+          className="bg-blue-600 text-white py-1 px-3 rounded hover:bg-blue-700"
+        >
+          Refresh Orders
+        </button>
+      </div>
+
       {orders.map(order => (
         <div key={order._id} className="border p-4 mb-4 bg-white shadow">
           <div className="flex justify-between text-sm text-gray-600 mb-2">
