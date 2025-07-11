@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import BASE_URL from '../../config';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -20,7 +21,7 @@ const AdminProducts = () => {
 
     const fetchProducts = async () => {
       try {
-        const res = await fetch('http://localhost:5001/api/products');
+        const res = await fetch(`${BASE_URL}/api/products`);
         const data = await res.json();
         setProducts(data);
       } catch (err) {
@@ -34,7 +35,7 @@ const AdminProducts = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure?')) return;
     try {
-      const res = await fetch(`http://localhost:5001/api/admin/products/${id}`, {
+      const res = await fetch(`${BASE_URL}/api/admin/products/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${user.token}` },
       });
@@ -51,8 +52,8 @@ const AdminProducts = () => {
     e.preventDefault();
     const method = editingProduct ? 'PUT' : 'POST';
     const url = editingProduct
-      ? `http://localhost:5001/api/admin/products/${editingProduct._id}`
-      : `http://localhost:5001/api/admin/products`;
+      ? `${BASE_URL}/api/admin/products/${editingProduct._id}`
+      : `${BASE_URL}/api/admin/products`;
 
     try {
       const res = await fetch(url, {
@@ -99,13 +100,24 @@ const AdminProducts = () => {
     <div className="p-6 max-w-6xl mx-auto">
       <h2 className="text-2xl font-bold mb-4">{editingProduct ? 'Edit Product' : 'Create New Product'}</h2>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-        <input type="text" placeholder="Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="border p-2 rounded" required />
-        <input type="number" placeholder="Price" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} className="border p-2 rounded" required />
-        <input type="text" placeholder="Image URL" value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} className="border p-2 rounded" required />
-        <input type="text" placeholder="Category" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="border p-2 rounded" required />
-        <input type="text" placeholder="Brand" value={form.brand} onChange={e => setForm({ ...form, brand: e.target.value })} className="border p-2 rounded" required />
-        <input type="number" placeholder="Count In Stock" value={form.countInStock} onChange={e => setForm({ ...form, countInStock: e.target.value })} className="border p-2 rounded" required />
-        <textarea placeholder="Description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="border p-2 rounded col-span-1 md:col-span-2" required />
+        {['name', 'price', 'image', 'category', 'brand', 'countInStock'].map((field) => (
+          <input
+            key={field}
+            type={field === 'price' || field === 'countInStock' ? 'number' : 'text'}
+            placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+            value={form[field]}
+            onChange={e => setForm({ ...form, [field]: e.target.value })}
+            className="border p-2 rounded"
+            required
+          />
+        ))}
+        <textarea
+          placeholder="Description"
+          value={form.description}
+          onChange={e => setForm({ ...form, description: e.target.value })}
+          className="border p-2 rounded col-span-1 md:col-span-2"
+          required
+        />
         <button type="submit" className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 col-span-1 md:col-span-2">
           {editingProduct ? 'Update Product' : 'Add Product'}
         </button>

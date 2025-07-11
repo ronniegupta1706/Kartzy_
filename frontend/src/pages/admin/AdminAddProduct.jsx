@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import BASE_URL from '../../config';
 
 const AdminAddProduct = () => {
   const navigate = useNavigate();
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+
   const [form, setForm] = useState({
     name: '',
     price: '',
@@ -18,7 +20,7 @@ const AdminAddProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!userInfo || !userInfo.token || !userInfo.isAdmin) {
+    if (!userInfo?.token || !userInfo.isAdmin) {
       toast.error('Unauthorized');
       return navigate('/admin-login');
     }
@@ -30,7 +32,7 @@ const AdminAddProduct = () => {
     };
 
     try {
-      const res = await fetch('/api/admin/products', {
+      const res = await fetch(`${BASE_URL}/api/admin/products`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -61,54 +63,17 @@ const AdminAddProduct = () => {
     <div className="p-6 max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-4">Add New Product</h2>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input
-          type="text"
-          placeholder="Product Name"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          className="border p-2 rounded"
-          required
-        />
-        <input
-          type="number"
-          placeholder="Price"
-          value={form.price}
-          onChange={(e) => setForm({ ...form, price: e.target.value })}
-          className="border p-2 rounded"
-          required
-        />
-        <input
-          type="text"
-          placeholder="Category"
-          value={form.category}
-          onChange={(e) => setForm({ ...form, category: e.target.value })}
-          className="border p-2 rounded"
-          required
-        />
-        <input
-          type="text"
-          placeholder="Brand"
-          value={form.brand}
-          onChange={(e) => setForm({ ...form, brand: e.target.value })}
-          className="border p-2 rounded"
-          required
-        />
-        <input
-          type="number"
-          placeholder="Count In Stock"
-          value={form.countInStock}
-          onChange={(e) => setForm({ ...form, countInStock: e.target.value })}
-          className="border p-2 rounded"
-          required
-        />
-        <input
-          type="text"
-          placeholder="Image URL (e.g., /images/sports/gm.png)"
-          value={form.image}
-          onChange={(e) => setForm({ ...form, image: e.target.value })}
-          className="border p-2 rounded"
-          required
-        />
+        {['name', 'price', 'category', 'brand', 'countInStock', 'image'].map((field) => (
+          <input
+            key={field}
+            type={field === 'price' || field === 'countInStock' ? 'number' : 'text'}
+            placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+            value={form[field]}
+            onChange={(e) => setForm({ ...form, [field]: e.target.value })}
+            className="border p-2 rounded"
+            required
+          />
+        ))}
         <textarea
           placeholder="Description"
           value={form.description}

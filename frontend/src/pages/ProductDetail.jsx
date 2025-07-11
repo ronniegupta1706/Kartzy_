@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext'; // ✅ Added
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const { cartItems, dispatch } = useCart();
+  const { wishlist, addToWishlist } = useWishlist(); // ✅ Added
+  const isWishlisted = wishlist.some(item => item._id === id); // ✅ Check if in wishlist
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -93,6 +96,12 @@ const ProductDetail = () => {
             className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
           >
             Buy Now
+          </button>
+          <button
+            onClick={() => addToWishlist(product)}
+            className="bg-pink-500 text-white px-6 py-2 rounded hover:bg-pink-700"
+          >
+            {isWishlisted ? 'Wishlisted ❤️' : 'Add to Wishlist'}
           </button>
         </div>
       </div>

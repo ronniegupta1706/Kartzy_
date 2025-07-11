@@ -13,7 +13,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import './index.css';
-
+import Wishlist from './pages/Wishlist';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminOrders from './pages/admin/AdminOrders';
@@ -30,10 +30,11 @@ const App = () => {
         <Routes>
           {/* Pages with Navbar */}
           <Route element={<Layout />}>
-            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/products/:id" element={<ProductDetail />} />
             <Route path="/products/category/:categoryName" element={<CategoryProducts />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/wishlist" element={<Wishlist />} />
 
             {/* Protected Route for Logged-in Users */}
             <Route element={<PrivateRoute />}>
@@ -43,7 +44,7 @@ const App = () => {
           </Route>
 
           {/* Pages without Navbar */}
-          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/admin-login" element={<AdminLogin />} />
 

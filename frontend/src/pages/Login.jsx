@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import loginImg from '../assets/login.png';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -16,14 +17,16 @@ const Login = () => {
 
     try {
       const res = await axios.post('http://localhost:5001/api/users/login', formData);
-      alert('Login successful!');
       localStorage.setItem('userInfo', JSON.stringify(res.data));
+      toast.success('Login successful!');
+      
       if (res.data.isAdmin) {
       navigate('/admin');
-      }
-      else {
-       navigate('/');
+     } else {
+      navigate('/home');
      }
+    // Show toast after navigation if needed, or use a non-blocking notification library
+    // Example: toast.success('Login successful!');
     } catch (err) {
       if (err.response?.status === 401) {
         alert('Invalid credentials');
