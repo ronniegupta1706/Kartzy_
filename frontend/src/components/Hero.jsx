@@ -1,10 +1,6 @@
 import React from 'react';
 import Slider from 'react-slick';
-import { useNavigate } from 'react-router-dom'; 
-
-// Import slick styles in App.js or index.js
-// import "slick-carousel/slick/slick.css";
-// import "slick-carousel/slick/slick-theme.css";
+import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -13,57 +9,58 @@ const Hero = () => {
     dots: true,
     infinite: true,
     speed: 300,
-    slidesToShow: 1,   
+    slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 3000,
+    autoplaySpeed: 4000,
     arrows: true,
+    appendDots: dots => (
+      <div className="absolute bottom-4 w-full flex justify-center">{dots}</div>
+    ),
+    customPaging: () => (
+      <div className="w-3 h-3 bg-white rounded-full mx-1"></div>
+    ),
   };
 
   const slides = [
     {
-      title: "Best deal on Electronics",
+      title: "Upgrade Your Tech Today",
       img: "slider1.png",
-      alt: "Electronics Sale ",
+      alt: "Electronics",
       link: "/products/electronics",
     },
     {
-      title: "Trending Sale - up to 60% off",
+      title: "Style Reimagined for You",
       img: "slider2.png",
-      alt: "Clothing Sale",
+      alt: "Clothing",
       link: "/products/clothing",
     },
     {
-      title: "Gear Up - Sports Footwear",
+      title: "Power Through with Premium Kicks",
       img: "slider3.jpg",
-      alt: "Sports Footwear Sale",
+      alt: "Footwear",
       link: "/products/shoes",
     },
     {
-      title: "Furnish Your Home in Style",
+      title: "Modern Comfort for Every Room",
       img: "slider4.jpg",
-      alt: "Furniture Collection",
+      alt: "Furniture",
       link: "/products/furniture",
     },
   ];
 
   return (
     <div className="bg-yellow-50 py-4">
-      <div className="w-full max-w-[1200px] mx-auto rounded ">
+      <div className="w-full max-w-[1200px] mx-auto rounded relative">
         <Slider {...settings}>
           {slides.map((slide, idx) => (
-            <div
-              key={idx}
-              onClick={() => navigate(slide.link)}
-              className="cursor-pointer relative"
-            >
-              <img
-                src={slide.img}
-                alt={slide.alt}
-                className="w-full h-[400px]"
-              />
-              <div className="absolute top-6 left-6 bg-white bg-opacity-80 px-4 py-2 rounded shadow text-xl font-semibold text-gray-900">
-                {slide.title}
+            <div key={idx} onClick={() => navigate(slide.link)} className="cursor-pointer relative">
+              <img src={slide.img} alt={slide.alt} className="w-full h-[400px] object-cover rounded-lg" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent rounded-lg flex flex-col justify-center px-10 py-6 text-white">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">{slide.title}</h2>
+                <button className="bg-white text-black px-4 py-2 rounded font-semibold w-fit" onClick={() => navigate(slide.link)}>
+                  Shop Now
+                </button>
               </div>
             </div>
           ))}
@@ -74,4 +71,3 @@ const Hero = () => {
 };
 
 export default Hero;
-
