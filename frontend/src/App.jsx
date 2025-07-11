@@ -14,6 +14,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import './index.css';
 import Wishlist from './pages/Wishlist';
+import SearchResults from './pages/SearchResults';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminOrders from './pages/admin/AdminOrders';
@@ -35,7 +36,7 @@ const App = () => {
             <Route path="/products/category/:categoryName" element={<CategoryProducts />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/wishlist" element={<Wishlist />} />
-
+            <Route path="/search" element={<SearchResults />} />
             {/* Protected Route for Logged-in Users */}
             <Route element={<PrivateRoute />}>
               <Route path="/orders" element={<Orders />} />

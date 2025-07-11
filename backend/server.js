@@ -6,7 +6,8 @@ import mongoose from 'mongoose';
 import Product from './models/Product.js';
 import userRoutes from './routes/userRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
-
+import adminProductRoutes from './routes/adminProductRoutes.js';
+import productRoutes from './routes/productRoutes.js';
 dotenv.config();
 const app = express();
 
@@ -20,8 +21,10 @@ app.use('/images', express.static('images'));
 // Routes
 app.use('/api/users', userRoutes);      // user signup/login
 app.use('/api/orders', orderRoutes);    // orders (user + admin)
+app.use('/api/admin/products', adminProductRoutes); // admin product management
+app.use('/api/products', productRoutes);
 
-// Health check
+// API check
 app.get('/', (req, res) => {
   res.send('API is running');
 });

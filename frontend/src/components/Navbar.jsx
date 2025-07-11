@@ -32,7 +32,7 @@ const Navbar = () => {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (query.trim()) {
-      navigate(`/products?q=${encodeURIComponent(query.trim())}`);
+      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
     }
   };
 
@@ -40,7 +40,7 @@ const Navbar = () => {
     localStorage.removeItem('userInfo');
     setUser(null);
     setShowDropdown(false);
-    navigate('/login');
+    navigate('/');
   };
 
   return (

@@ -1,5 +1,6 @@
 import Product from '../models/Product.js';
 
+// Get all products
 export const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
@@ -9,7 +10,7 @@ export const getAllProducts = async (req, res) => {
   }
 };
 
-// Public: Get product by ID
+// Get product by ID
 export const getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -20,7 +21,26 @@ export const getProductById = async (req, res) => {
   }
 };
 
-// Admin: Create new product
+// Search products
+export const searchProducts = async (req, res) => {
+  try {
+    const keyword = req.query.q?.trim();
+
+    if (!keyword) {
+      return res.status(400).json({ message: 'No search keyword provided' });
+    }
+
+    const products = await Product.find({
+      name: { $regex: keyword, $options: 'i' }
+    });
+
+    res.json(products);
+  } catch (err) {
+    console.error('❌ Search error:', err);
+    res.status(500).json({ message: 'Server Error', error: err.message });
+  }
+};
+
 export const createProduct = async (req, res) => {
   try {
     const { name, price, description, image, category, brand, countInStock } = req.body;
@@ -32,7 +52,7 @@ export const createProduct = async (req, res) => {
   }
 };
 
-// Admin: Update product
+// Update product
 export const updateProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -55,7 +75,7 @@ export const updateProduct = async (req, res) => {
   }
 };
 
-// Admin: Delete product
+// Delete product
 export const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
