@@ -17,9 +17,9 @@ const ProductCard = ({ product }) => {
         <div className="p-4 bg-gray-50 rounded-b-lg">
           <h2 className="text-lg font-semibold mb-1">{product.name}</h2>
           {product.originalPrice && (
-            <p className="text-sm text-gray-500 line-through">Rs {product.originalPrice}</p>
+            <p className="text-sm text-gray-500 line-through">₹ {product.originalPrice}</p>
           )}
-          <p className="text-lg font-semibold text-red-500">Rs {product.price}</p>
+          <p className="text-lg font-semibold text-red-500">₹  {product.price}</p>
         </div>
       </Link>
 

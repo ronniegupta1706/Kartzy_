@@ -2,15 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useCart } from '../context/CartContext';
-import { useWishlist } from '../context/WishlistContext'; // ✅ Added
+import { useWishlist } from '../context/WishlistContext';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const { cartItems, dispatch } = useCart();
-  const { wishlist, addToWishlist } = useWishlist(); // ✅ Added
-  const isWishlisted = wishlist.some(item => item._id === id); // ✅ Check if in wishlist
+  const { wishlist, addToWishlist } = useWishlist();
+  const isWishlisted = wishlist.some(item => item._id === id);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -57,52 +57,58 @@ const ProductDetail = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row p-6 gap-10 max-w-[1200px] mx-auto bg-white rounded shadow-sm">
-      <div className="md:w-1/2 flex justify-center items-center bg-gray-100 rounded">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="h-[300px] object-contain p-4"
-        />
-      </div>
-
-      <div className="flex-1">
-        <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
-        <p className="text-xl text-red-600 font-semibold mb-2">Rs {product.price}</p>
-        <p className="text-sm text-gray-700 mb-2"><strong>Brand:</strong> {product.brand}</p>
-        <p className="text-sm text-gray-700 mb-2"><strong>Rating:</strong> ⭐ {product.rating} / 5</p>
-        <p className="text-sm text-gray-700 mb-2"><strong>Stock:</strong> {product.countInStock > 0 ? 'In Stock' : 'Out of Stock'}</p>
-        <p className="text-gray-800 mb-4">{product.description}</p>
-
-        <div className="mb-4 bg-yellow-100 p-3 rounded-md text-sm">
-          <p className="font-semibold text-green-800">Available Offers:</p>
-          <ul className="list-disc ml-5 mt-1 text-gray-700">
-            <li>10% off on Axis Bank Cards</li>
-            <li>Flat ₹50 off on first Kartzy order</li>
-            <li>No Cost EMI available on orders above ₹999</li>
-            <li>Additional 5% off on SBI Credit/Debit cards</li>
-          </ul>
+    <div className="min-h-screen bg-yellow-50 py-10 px-4">
+      <div className="flex flex-col md:flex-row gap-10 max-w-6xl mx-auto bg-white rounded shadow-md p-6">
+        {/* Left Image */}
+        <div className="md:w-1/2 flex justify-center items-center bg-gray-100 rounded">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="h-[300px] object-contain p-4"
+          />
         </div>
 
-        <div className="flex gap-4">
-          <button
-            onClick={handleAddToCart}
-            className="bg-blue-600 hover:bg-blue-800 text-white px-6 py-2 rounded"
-          >
-            Add to Cart
-          </button>
-          <button
-            onClick={handleBuyNow}
-            className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
-          >
-            Buy Now
-          </button>
-          <button
-            onClick={() => addToWishlist(product)}
-            className="bg-pink-500 text-white px-6 py-2 rounded hover:bg-pink-700"
-          >
-            {isWishlisted ? 'Wishlisted ❤️' : 'Add to Wishlist'}
-          </button>
+        {/* Right Details */}
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
+          <p className="text-xl text-red-600 font-semibold mb-2">₹ {product.price}</p>
+          <p className="text-sm text-gray-700 mb-1"><strong>Brand:</strong> {product.brand}</p>
+          <p className="text-sm text-gray-700 mb-1"><strong>Rating:</strong> ⭐ {product.rating} / 5</p>
+          <p className="text-sm text-gray-700 mb-2"><strong>Stock:</strong> {product.countInStock > 0 ? 'In Stock' : 'Out of Stock'}</p>
+          <p className="text-gray-800 mb-4">{product.description}</p>
+
+          {/* Offers */}
+          <div className="mb-4 bg-yellow-100 p-3 rounded-md text-sm">
+            <p className="font-semibold text-green-800">Available Offers:</p>
+            <ul className="list-disc ml-5 mt-1 text-gray-700">
+              <li>10% off on Axis Bank Cards</li>
+              <li>Flat ₹50 off on first Kartzy order</li>
+              <li>No Cost EMI available on orders above ₹999</li>
+              <li>Additional 5% off on SBI Credit/Debit cards</li>
+            </ul>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-4">
+            <button
+              onClick={handleAddToCart}
+              className="bg-blue-600 hover:bg-blue-800 text-white px-6 py-2 rounded"
+            >
+              Add to Cart
+            </button>
+            <button
+              onClick={handleBuyNow}
+              className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+            >
+              Buy Now
+            </button>
+            <button
+              onClick={() => addToWishlist(product)}
+              className="bg-pink-500 text-white px-6 py-2 rounded hover:bg-pink-700"
+            >
+              {isWishlisted ? 'Wishlisted ❤️' : 'Add to Wishlist'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

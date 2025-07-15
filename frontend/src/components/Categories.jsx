@@ -3,14 +3,14 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const categories = [
-  { name: 'Electronics', image: 'laptop.jpg', link: '/products/category/electronics' },
-  { name: 'Clothing', image: 'tshirt.png', link: '/products/category/clothing' },
-  { name: 'Footwear', image: 'football_shoes.png', link: '/products/category/shoes' },
-  { name: 'Furniture', image: 'table.png', link: '/products/category/furniture' },
-  {name: 'Beauty&Personal Care', image:'beauty.png', link:'/products/category/beauty'},
-  {name: 'Sports',image:'sports.png', link:'/products/category/sports'},
-  {name: 'Books', image:'books.png', link:'/products/category/books'},
-  { name: 'Accessories & Bags', image: 'accessories.png', link: '/products/category/accessories' },
+  { name: 'Electronics', image: '/images/categories_headers/electronics.jpg', link: '/products/category/electronics' },
+  { name: 'Clothing', image: '/images/categories_headers/clothing.jpg', link: '/products/category/clothing' },
+  { name: 'Footwear', image: '/images/categories_headers/footwear.jpg', link: '/products/category/shoes' },
+  { name: 'Furniture', image: '/images/categories_headers/furniture.jpg', link: '/products/category/furniture' },
+  {name: 'Beauty&Personal Care', image:'/images/categories_headers/beauty.jpg', link:'/products/category/beauty'},
+  {name: 'Sports',image:'/images/categories_headers/sports.jpg', link:'/products/category/sports'},
+  {name: 'Books', image:'/images/categories_headers/books.jpg', link:'/products/category/books'},
+  { name: 'Accessories & Bags', image: '/images/categories_headers/accessories.jpg', link: '/products/category/accessories' },
 
 ];
 

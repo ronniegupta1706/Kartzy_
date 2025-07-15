@@ -44,48 +44,58 @@ const Orders = () => {
     }
   }, [user]);
 
-  if (loading) return <div className="p-6">Loading...</div>;
-  if (!orders.length) return <div className="p-6">No orders found.</div>;
+  if (loading) return <div className="p-6 bg-yellow-50 min-h-screen">Loading...</div>;
+  if (!orders.length) return <div className="p-6 bg-yellow-50 min-h-screen">No orders found.</div>;
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">My Orders</h2>
-        <button
-          onClick={fetchOrders}
-          className="bg-blue-600 text-white py-1 px-3 rounded hover:bg-blue-700"
-        >
-          Refresh Orders
-        </button>
-      </div>
-
-      {orders.map(order => (
-        <div key={order._id} className="border p-4 mb-4 bg-white shadow">
-          <div className="flex justify-between text-sm text-gray-600 mb-2">
-            <span>Order ID: <strong>{order._id}</strong></span>
-            <span>Date: {new Date(order.createdAt).toLocaleString()}</span>
-          </div>
-          <p><strong>Shipping:</strong> {order.shippingAddress.address}, {order.shippingAddress.city}</p>
-          <p><strong>Payment Method:</strong> {order.paymentMethod}</p>
-          <p><strong>Status:</strong> {order.isDelivered ? 'Delivered' : 'Pending'}</p>
-
-          <div className="mt-3">
-            <h4 className="font-semibold mb-2">Items:</h4>
-            <ul className="space-y-2">
-              {order.orderItems.map(item => (
-                <li key={item.product} className="flex items-center space-x-3">
-                  <img src={item.image} alt={item.name} className="w-12 h-12 object-cover rounded" />
-                  <span>{item.name} × {item.qty} = ₹{item.qty * item.price}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="mt-2 text-right font-bold text-green-700">
-            Total: ₹{order.totalPrice}
-          </div>
+    <div className="p-6 bg-yellow-50 min-h-screen">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">My Orders</h2>
+          <button
+            onClick={fetchOrders}
+            className="bg-blue-600 text-white py-1 px-3 rounded hover:bg-blue-700"
+          >
+            Refresh Orders
+          </button>
         </div>
-      ))}
+
+        {orders.map(order => (
+          <div key={order._id} className="border p-4 mb-4 bg-white shadow rounded">
+            <div className="flex flex-col md:flex-row justify-between text-sm text-gray-600 mb-2">
+              <span>Order ID: <strong>{order._id}</strong></span>
+              <span>Date: {new Date(order.createdAt).toLocaleString()}</span>
+            </div>
+            <p><strong>Shipping:</strong> {order.shippingAddress.address}, {order.shippingAddress.city}</p>
+            <p><strong>Payment Method:</strong> {order.paymentMethod}</p>
+            <p>
+              <strong>Status:</strong>{' '}
+              <span
+                className={`text-xs font-semibold px-2 py-1 rounded 
+                  ${order.isDelivered ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-800'}`}
+              >
+                {order.isDelivered ? 'Delivered ✅' : 'Pending 🕒'}
+              </span>
+            </p>
+
+            <div className="mt-3">
+              <h4 className="font-semibold mb-2">Items:</h4>
+              <ul className="space-y-2">
+                {order.orderItems.map(item => (
+                  <li key={item.product} className="flex items-center space-x-3">
+                    <img src={item.image} alt={item.name} className="w-12 h-12 object-cover rounded" />
+                    <span>{item.name} × {item.qty} = ₹{(item.qty * item.price).toFixed(2)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="mt-2 text-right font-bold text-green-700">
+              Total: ₹{order.totalPrice.toFixed(2)}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
