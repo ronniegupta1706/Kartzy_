@@ -68,17 +68,17 @@ const ProductDetail = () => {
 
       <div className="flex-1">
         <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
-        <p className="text-xl text-red-600 font-semibold mb-2"> ₹ {product.price}</p>
+        <p className="text-xl text-red-600 font-semibold mb-2">Rs {product.price}</p>
         <p className="text-sm text-gray-700 mb-2"><strong>Brand:</strong> {product.brand}</p>
         <p className="text-sm text-gray-700 mb-2"><strong>Rating:</strong> ⭐ {product.rating} / 5</p>
         <p className="text-sm text-gray-700 mb-2"><strong>Stock:</strong> {product.countInStock > 0 ? 'In Stock' : 'Out of Stock'}</p>
         <p className="text-gray-800 mb-4">{product.description}</p>
 
         <div className="mb-4 bg-yellow-100 p-3 rounded-md text-sm">
-          <p className="font-semibold text-green-800">Available Offe ₹ :</p>
+          <p className="font-semibold text-green-800">Available Offers:</p>
           <ul className="list-disc ml-5 mt-1 text-gray-700">
             <li>10% off on Axis Bank Cards</li>
-            <li>Flat ₹50 off on fi ₹ t Kartzy order</li>
+            <li>Flat ₹50 off on first Kartzy order</li>
             <li>No Cost EMI available on orders above ₹999</li>
             <li>Additional 5% off on SBI Credit/Debit cards</li>
           </ul>

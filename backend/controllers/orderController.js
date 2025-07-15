@@ -1,5 +1,5 @@
 import Order from '../models/Order.js';
-import moment from 'moment';
+
 // — USER CONTROLLERS —
 export const addOrder = async (req, res) => {
   const { orderItems, shippingAddress, paymentMethod, totalPrice } = req.body;
@@ -81,27 +81,6 @@ export const deleteOrder = async (req, res) => {
     res.json({ message: 'Order deleted' });
   } catch (err) {
     console.error('Delete Order Error:', err);
-    res.status(500).json({ message: 'Server Error', error: err.message });
-  }
-};
-
-//track order status summary
-export const getSalesPerDay = async (req, res) => {
-  try {
-    const orders = await Order.find({ isPaid: true }, 'createdAt');
-    const dailySales = {};
-
-    orders.forEach(order => {
-      const day = new Date(order.createdAt).toISOString().split('T')[0]; // "2025-07-15"
-      dailySales[day] = (dailySales[day] || 0) + 1;
-    });
-
-    const result = Object.entries(dailySales)
-      .sort((a, b) => new Date(a[0]) - new Date(b[0]))
-      .map(([date, orders]) => ({ date, orders }));
-
-    res.json(result);
-  } catch (err) {
     res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };

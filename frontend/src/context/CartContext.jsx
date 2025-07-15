@@ -59,7 +59,7 @@ export const CartProvider = ({ children }) => {
     const stored = localStorage.getItem('cartItems');
     return stored ? { cartItems: JSON.parse(stored) } : initial;
   }
- );
+ ); // Initialize with localStorage so that on refresh, the cart persists and not reset
   return (
     <CartContext.Provider value={{ cartItems: state.cartItems, dispatch }}>
       {children}

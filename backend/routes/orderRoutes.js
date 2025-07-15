@@ -6,7 +6,6 @@ import {
   getAllOrders,
   updateOrderStatus,
   deleteOrder,
-  getSalesPerDay,
 } from '../controllers/orderController.js';
 import { protect, isAdmin } from '../middleware/authMiddleware.js';
 
@@ -21,7 +20,5 @@ router.put('/:id/cancel', protect, cancelOrder);
 router.get('/admin/all', protect, isAdmin, getAllOrders);
 router.put('/:id/status', protect, isAdmin, updateOrderStatus);
 router.delete('/:id', protect, isAdmin, deleteOrder);
-
-router.get('/admin/sales-daily', protect, isAdmin, getSalesPerDay); 
 
 export default router;

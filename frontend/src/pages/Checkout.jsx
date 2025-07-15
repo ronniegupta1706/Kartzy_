@@ -15,7 +15,6 @@ const Checkout = () => {
   const [showNewAddress, setShowNewAddress] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('');
 
-  // 🔁 Get mode: either single item or full cart
   const { mode, singleItem } = location.state || {};
   const itemsToOrder = mode === 'single' && singleItem ? [singleItem] : cartItems;
 
@@ -97,7 +96,6 @@ const Checkout = () => {
         }
       }
 
-      // ✅ Clear full cart or just one item depending on mode
       if (mode === 'single' && singleItem) {
         dispatch({ type: 'REMOVE_FROM_CART', payload: singleItem._id });
       } else {
@@ -114,90 +112,97 @@ const Checkout = () => {
   };
 
   return (
-    <div className="p-6 flex flex-col md:flex-row gap-6 max-w-6xl mx-auto">
-      {/* Left: Form */}
-      <div className="flex-1 space-y-6">
-        {/* Address Section */}
-        <div className="bg-white p-4 shadow rounded">
-          <h2 className="text-lg font-semibold mb-2">Choose Delivery Address</h2>
-          {addresses.map((addr, idx) => (
-            <label key={idx} className="block mb-2">
-              <input
-                type="radio"
-                name="address"
-                checked={selectedAddress === addr.details}
-                onChange={() => setSelectedAddress(addr.details)}
-                className="mr-2"
-              />
-              <strong>{addr.label}:</strong> {addr.details}
-            </label>
-          ))}
-          <button className="text-blue-600 mt-2" onClick={() => setShowNewAddress(!showNewAddress)}>
-            {showNewAddress ? 'Cancel' : 'Add New Address'}
-          </button>
+    <div className="min-h-screen bg-yellow-50 p-6">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
 
-          {showNewAddress && (
-            <div className="mt-3 space-y-2">
-              <input
-                type="text"
-                placeholder="Label (e.g. Home)"
-                value={newAddress.label}
-                onChange={e => setNewAddress({ ...newAddress, label: e.target.value })}
-                className="border px-2 py-1 w-full rounded"
-              />
-              <textarea
-                placeholder="Address details"
-                value={newAddress.details}
-                onChange={e => setNewAddress({ ...newAddress, details: e.target.value })}
-                className="border px-2 py-1 w-full rounded"
-              />
-              <button onClick={handleAddNewAddress} className="bg-blue-600 text-white px-4 py-1 rounded">
-                Save Address
-              </button>
-            </div>
-          )}
-        </div>
+        {/* LEFT SECTION */}
+        <div className="flex-1 space-y-6">
 
-        {/* Payment Section */}
-        <div className="bg-white p-4 shadow rounded">
-          <h2 className="text-lg font-semibold mb-2">Select Payment Method</h2>
-          {["Cash on Delivery", "Credit/Debit Card", "UPI", "Net Banking"].map(method => (
-            <label key={method} className="block mb-2">
-              <input
-                type="radio"
-                name="payment"
-                checked={paymentMethod === method}
-                onChange={() => setPaymentMethod(method)}
-                className="mr-2"
-              />
-              {method}
-            </label>
-          ))}
-        </div>
-      </div>
+          {/* Address Section */}
+          <div className="bg-white p-4 rounded shadow">
+            <h2 className="text-lg font-semibold mb-2">📍 Choose Delivery Address</h2>
+            {addresses.map((addr, idx) => (
+              <label key={idx} className="block mb-2">
+                <input
+                  type="radio"
+                  name="address"
+                  checked={selectedAddress === addr.details}
+                  onChange={() => setSelectedAddress(addr.details)}
+                  className="mr-2"
+                />
+                <strong>{addr.label}:</strong> {addr.details}
+              </label>
+            ))}
+            <button className="text-blue-600 mt-2" onClick={() => setShowNewAddress(!showNewAddress)}>
+              {showNewAddress ? 'Cancel' : '➕ Add New Address'}
+            </button>
 
-      {/* Right: Summary */}
-      <div className="w-full md:w-1/3 bg-white p-4 shadow rounded">
-        <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
-        {itemsToOrder.map(item => (
-          <div key={item._id} className="mb-2 flex justify-between">
-            <span>{item.title} x {item.quantity}</span>
-            <span>₹{item.price * item.quantity}</span>
+            {showNewAddress && (
+              <div className="mt-3 space-y-2">
+                <input
+                  type="text"
+                  placeholder="Label (e.g. Home)"
+                  value={newAddress.label}
+                  onChange={e => setNewAddress({ ...newAddress, label: e.target.value })}
+                  className="border px-2 py-1 w-full rounded"
+                />
+                <textarea
+                  placeholder="Address details"
+                  value={newAddress.details}
+                  onChange={e => setNewAddress({ ...newAddress, details: e.target.value })}
+                  className="border px-2 py-1 w-full rounded"
+                />
+                <button onClick={handleAddNewAddress} className="bg-blue-600 text-white px-4 py-1 rounded">
+                  Save Address
+                </button>
+              </div>
+            )}
           </div>
-        ))}
-        <hr className="my-2" />
-        <div className="flex justify-between text-sm">
-          <span>Subtotal</span><span>₹{subtotal}</span>
+
+          {/* Payment Method Section */}
+          <div className="bg-white p-4 rounded shadow">
+            <h2 className="text-lg font-semibold mb-2">🏦 Select Payment Method</h2>
+            {["Cash on Delivery", "Credit/Debit Card", "UPI", "Net Banking"].map(method => (
+              <label key={method} className="block mb-2">
+                <input
+                  type="radio"
+                  name="payment"
+                  checked={paymentMethod === method}
+                  onChange={() => setPaymentMethod(method)}
+                  className="mr-2"
+                />
+                {method}
+              </label>
+            ))}
+          </div>
         </div>
-        <div className="flex justify-between text-sm">
-          <span>Shipping</span><span>{shipping ? `₹${shipping}` : "Free"}</span>
+
+        {/* RIGHT SECTION: Summary */}
+        <div className="w-full md:w-1/3 bg-white p-4 rounded shadow">
+          <h2 className="text-lg font-semibold mb-4">🧾 Order Summary</h2>
+          {itemsToOrder.map(item => (
+            <div key={item._id} className="mb-2 flex justify-between">
+              <span>{item.title} x {item.quantity}</span>
+              <span>₹{item.price * item.quantity}</span>
+            </div>
+          ))}
+          <hr className="my-2" />
+          <div className="flex justify-between text-sm">
+            <span>Subtotal</span><span>₹{subtotal}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span>Shipping</span><span>{shipping ? `₹${shipping}` : "Free"}</span>
+          </div>
+          <div className="flex justify-between font-bold text-lg mt-2">
+            <span>Total</span><span>₹{total}</span>
+          </div>
+          <button
+            onClick={handlePlaceOrder}
+            className="w-full bg-green-600 text-white py-2 rounded mt-4 hover:bg-green-700"
+          >
+            ✅ Place Order
+          </button>
         </div>
-        <div className="flex justify-between font-bold text-lg mt-2">
-          <span>Total</span><span>₹{total}</span>
-        </div>
-        <button onClick={handlePlaceOrder} className="w-full bg-green-600 text-white py-2 rounded mt-4 hover:bg-green-700">
-          Place Order
-        </button>
       </div>
     </div>
   );
