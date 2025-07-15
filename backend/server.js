@@ -8,6 +8,9 @@ import userRoutes from './routes/userRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import adminProductRoutes from './routes/adminProductRoutes.js';
 import productRoutes from './routes/productRoutes.js';
+
+import adminRoutes from './routes/adminRoutes.js';
+
 dotenv.config();
 const app = express();
 
@@ -23,6 +26,8 @@ app.use('/api/users', userRoutes);      // user signup/login
 app.use('/api/orders', orderRoutes);    // orders (user + admin)
 app.use('/api/admin/products', adminProductRoutes); // admin product management
 app.use('/api/products', productRoutes);
+
+app.use('/api/admin', adminRoutes);    // admin dashboard and analytics
 
 // API check
 app.get('/', (req, res) => {

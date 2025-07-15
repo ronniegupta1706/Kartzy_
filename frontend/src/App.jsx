@@ -20,7 +20,7 @@ import AdminLogin from './pages/admin/AdminLogin';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminAddProduct from './pages/admin/AdminAddProduct';
-
+import AdminAnalytics from './pages/admin/AdminAnalytics';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
 
@@ -55,6 +55,7 @@ const App = () => {
             <Route path="/admin/orders" element={<AdminOrders />} />
             <Route path="/admin/products" element={<AdminProducts />} />
             <Route path="/admin/add-product" element={<AdminAddProduct />} />
+            <Route path="/admin/analytics" element={<AdminAnalytics />} />
           </Route>
         </Routes>
       </Router>

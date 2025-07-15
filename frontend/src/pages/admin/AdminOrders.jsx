@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { CheckCircle, XCircle, Trash2, Truck } from 'lucide-react';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -68,45 +69,69 @@ const AdminOrders = () => {
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">Admin Dashboard</h2>
-      {orders.map(o => (
-        <div key={o._id} className="mb-4 p-4 border bg-white rounded shadow">
-          <div className="flex justify-between text-sm mb-2">
-            <span>Order: {o._id}</span>
-            <span>{new Date(o.createdAt).toLocaleString()}</span>
-          </div>
-          <div className="text-sm text-gray-600 mb-1">
-            User: {o.user.name} — {o.user.email}
-          </div>
-          <div className="mb-2">
-            <strong>Items:</strong>
-            {o.orderItems.map(i => (
-              <div key={i.product} className="flex items-center gap-3 my-1">
-                <img src={i.image} alt={i.name} className="w-10 h-10 object-cover rounded" />
-                <span>{i.name} × {i.qty} = ₹{i.qty * i.price}</span>
+    <div className="min-h-screen bg-yellow-50 p-6">
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-2xl font-bold mb-6">All Orders</h2>
+
+        {orders.length === 0 ? (
+          <p className="text-gray-500 italic">No orders available.</p>
+        ) : (
+          <div className="space-y-6">
+            {orders.map(o => (
+              <div key={o._id} className="p-6 bg-white rounded-xl shadow space-y-3">
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Order ID: <strong>{o._id}</strong></span>
+                  <span>{new Date(o.createdAt).toLocaleString()}</span>
+                </div>
+
+                <div className="text-sm text-gray-700">
+                  👤 <strong>{o.user.name}</strong> — {o.user.email}
+                </div>
+
+                <div>
+                  <strong>Items:</strong>
+                  <div className="flex flex-wrap gap-4 mt-2">
+                    {o.orderItems.map(i => (
+                      <div key={i.product} className="flex items-center gap-2 border px-2 py-1 rounded">
+                        <img src={i.image} alt={i.name} className="w-10 h-10 rounded object-cover" />
+                        <span className="text-sm">{i.name} × {i.qty}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <p className="text-sm text-gray-700">📍 Address: {o.shippingAddress.address}</p>
+                <p className="text-sm text-gray-700">💳 Payment: {o.paymentMethod}</p>
+
+                <div className="flex justify-between items-center mt-4">
+                  <span className={`text-sm font-medium px-3 py-1 rounded-full 
+                    ${o.isDelivered ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                    {o.isDelivered ? 'Delivered' : 'Pending'}
+                  </span>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleStatus(o._id, !o.isDelivered)}
+                      className={`flex items-center gap-1 px-3 py-1 rounded text-white text-sm
+                        ${o.isDelivered ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700'}`}
+                    >
+                      <Truck size={16} />
+                      {o.isDelivered ? 'Mark Pending' : 'Mark Delivered'}
+                    </button>
+
+                    <button
+                      onClick={() => handleDelete(o._id)}
+                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm flex items-center gap-1"
+                    >
+                      <Trash2 size={16} /> Delete
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
-          <div className="mb-2">Address: {o.shippingAddress.address}</div>
-          <div className="mb-2">Payment: {o.paymentMethod}</div>
-          <div className="mb-4">Status: {o.isDelivered ? 'Delivered' : 'Pending'}</div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => handleStatus(o._id, !o.isDelivered)}
-              className="bg-green-600 py-1 px-3 text-white rounded"
-            >
-              Mark {o.isDelivered ? 'Pending' : 'Delivered'}
-            </button>
-            <button
-              onClick={() => handleDelete(o._id)}
-              className="bg-red-600 py-1 px-3 text-white rounded"
-            >
-              Delete Order
-            </button>
-          </div>
-        </div>
-      ))}
+        )}
+      </div>
     </div>
   );
 };
