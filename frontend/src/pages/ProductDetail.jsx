@@ -56,10 +56,16 @@ const ProductDetail = () => {
     navigate('/checkout');
   };
 
+  // 💡 Discount logic: if originalPrice > price
+  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  const discountPercent = hasDiscount
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : 0;
+
   return (
     <div className="min-h-screen bg-yellow-50 py-10 px-4">
       <div className="flex flex-col md:flex-row gap-10 max-w-6xl mx-auto bg-white rounded shadow-md p-6">
-        {/* Left Image */}
+        {/* Product Image */}
         <div className="md:w-1/2 flex justify-center items-center bg-gray-100 rounded">
           <img
             src={product.image}
@@ -68,16 +74,29 @@ const ProductDetail = () => {
           />
         </div>
 
-        {/* Right Details */}
+        {/* Product Details */}
         <div className="flex-1">
           <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
-          <p className="text-xl text-red-600 font-semibold mb-2">₹ {product.price}</p>
+
+          {/* 💥 Show price + discount if available */}
+          {hasDiscount ? (
+            <div className="mb-2">
+              <p className="text-sm text-gray-500 line-through">₹ {product.originalPrice}</p>
+              <p className="text-xl text-red-600 font-bold">₹ {product.price}</p>
+              <span className="inline-block bg-red-500 text-white text-xs px-2 py-1 rounded mt-1">
+                {discountPercent}% OFF
+              </span>
+            </div>
+          ) : (
+            <p className="text-xl text-red-600 font-semibold mb-2">₹ {product.price}</p>
+          )}
+
           <p className="text-sm text-gray-700 mb-1"><strong>Brand:</strong> {product.brand}</p>
           <p className="text-sm text-gray-700 mb-1"><strong>Rating:</strong> ⭐ {product.rating} / 5</p>
           <p className="text-sm text-gray-700 mb-2"><strong>Stock:</strong> {product.countInStock > 0 ? 'In Stock' : 'Out of Stock'}</p>
           <p className="text-gray-800 mb-4">{product.description}</p>
 
-          {/* Offers */}
+          {/* Offers Section */}
           <div className="mb-4 bg-yellow-100 p-3 rounded-md text-sm">
             <p className="font-semibold text-green-800">Available Offers:</p>
             <ul className="list-disc ml-5 mt-1 text-gray-700">

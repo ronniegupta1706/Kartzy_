@@ -38,8 +38,10 @@ const App = () => {
             <Route path="/products/:id" element={<ProductDetail />} />
             <Route path="/products/category/:categoryName" element={<CategoryProducts />} />
             
-            <Route path="/products/tag/:tag" element={<CollectionPage />} />
-            <Route path="/collections/:tag/all" element={<CollectionAllProducts/>} />
+           <Route path="/products/tag/:tag" element={<CollectionPage />} />
+           <Route path="/products/tag/:tag/all" element={<CollectionAllProducts />} />
+
+            
 
             <Route path="/cart" element={<Cart />} />
             <Route path="/wishlist" element={<Wishlist />} />

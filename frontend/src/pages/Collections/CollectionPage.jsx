@@ -1,118 +1,71 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
-import collectionMeta from '../../data/collectionMeta';
-import ProductCard from '../../components/ProductCard';
+import React from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+
+const collectionData = {
+  kitchen: {
+    image: '/images/Collections/kitchen.jpg',
+    title: 'Kitchen Must-Haves',
+    tagline: 'Cook smart with our top-rated tools & containers',
+    quote: '“The kitchen is the heart of the home.”',
+    description: 'Discover must-have tools and smart storage to elevate your everyday cooking.',
+  },
+  fitness: {
+    image: '/images/Collections/gym.jpg',
+    title: 'Fitness Gear Zone',
+    tagline: 'Home workouts powered by mats, weights & more',
+    quote: '“Push yourself, because no one else is going to do it for you.”',
+    description: 'Your fitness journey starts here. Explore powerful tools to train at home or on the go.',
+  },
+  room: {
+    image: '/images/Collections/room.jpg',
+    title: 'Cozy Room Upgrades',
+    tagline: 'Posters, lights & comfort picks for every vibe',
+    quote: '“Your space reflects your soul.”',
+    description: 'Transform your room into a cozy, aesthetic space with our curated comfort picks.',
+  },
+  travel: {
+    image: '/images/Collections/travel.jpg',
+    title: 'Weekend Travel Picks',
+    tagline: 'Bags, bottles & travel-ready essentials',
+    quote: '“Life is short. The world is wide.”',
+    description: 'Get set to travel smart with these must-have travel essentials at amazing prices.',
+  },
+};
 
 const CollectionPage = () => {
   const { tag } = useParams();
-  const [products, setProducts] = useState([]);
-  const meta = collectionMeta[tag];
+  const navigate = useNavigate();
+  const data = collectionData[tag];
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await axios.get(`http://localhost:5001/api/products/tag/${tag}`);
-        setProducts(res.data);
-      } catch (err) {
-        console.error('Error loading products:', err);
-      }
-    };
-
-    fetchProducts();
-  }, [tag]);
-
-  if (!meta) return <div className="p-6 text-xl">❌ Invalid Collection</div>;
-
-  const trending = products.slice(0, 4);
-  const under500 = products.filter(p => p.price <= 500);
-  const discount = Math.floor(Math.random() * 20) + 10;
+  if (!data) {
+    return <div className="text-center py-20 text-gray-600">Invalid collection tag.</div>;
+  }
 
   return (
-    <div className="min-h-screen bg-[#fffef9]">
-      {/* Hero Banner */}
-      <div
-        className="h-[320px] w-full bg-cover bg-center relative flex items-center justify-center"
-        style={{ backgroundImage: `url(${meta.banner})` }}
-      >
-        <div className="absolute inset-0 bg-black/40" />
-        <div className="relative text-white text-center px-4">
-          <h1 className="text-4xl md:text-5xl font-bold">{meta.title}</h1>
-          <p className="mt-3 text-lg italic">{meta.motto}</p>
-          <div className="mt-3 inline-block bg-red-500 text-white text-sm px-4 py-1 rounded-full shadow">
-            Flat {discount}% OFF on Select Picks!
-          </div>
+    <div className="bg-yellow-50 min-h-screen">
+      {/* 🖼️ Hero Banner */}
+      <div className="relative w-full h-[65vh]">
+        <img
+          src={data.image}
+          alt={data.title}
+          className="w-full h-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-black/60 flex flex-col justify-center items-center text-center text-white px-6">
+          <h1 className="text-4xl md:text-5xl font-extrabold drop-shadow mb-2">{data.title}</h1>
+          <p className="text-lg md:text-xl mb-4 font-light tracking-wide">{data.tagline}</p>
+          <button
+            onClick={() => navigate(`/products/tag/${tag}/all`)}
+            className="mt-2 bg-yellow-400 hover:bg-yellow-500 text-black text-lg px-8 py-3 rounded-full font-semibold shadow-lg transition"
+          >
+            🛍️ Explore Collection
+          </button>
         </div>
       </div>
 
-      {/* Description and Body */}
-      <div className="bg-yellow-50 h-full">
-        <div className="max-w-4xl mx-auto text-center px-4 py-10">
-          <p className="text-gray-700 text-lg leading-relaxed">
-            {meta.description ||
-              'Browse through a hand-picked selection of items perfect for your lifestyle. Whether you’re upgrading your space, fitness gear, or prepping for your next trip — we’ve got something just right.'}
-          </p>
-        </div>
-
-        {/* Motivational Quote */}
-        {meta.quote && (
-          <div className="max-w-4xl mx-auto mt-[-20px] mb-8 px-4">
-            <div className="bg-rose-100 text-rose-800 text-center py-3 px-4 rounded-lg text-sm italic shadow">
-              {meta.quote}
-            </div>
-          </div>
-        )}
-
-        {/* Tag Suggestions */}
-        <div className="max-w-6xl mx-auto px-4 mb-6">
-          <h3 className="text-md font-semibold mb-2 text-gray-700">Popular tags</h3>
-          <div className="flex overflow-x-auto gap-3 pb-2">
-            {['Storage', 'Mugs', 'Lights', 'Rugs', 'Posters'].map((tag, idx) => (
-              <span
-                key={idx}
-                className="px-3 py-1 bg-gray-100 rounded-full text-sm whitespace-nowrap hover:bg-gray-200 cursor-pointer"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Trending Picks */}
-        {trending.length > 0 && (
-          <div className="max-w-7xl mx-auto px-4 pt-4">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">🔥 Top Picks You’ll Love</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {trending.map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Under ₹500 */}
-        {under500.length > 0 && (
-          <div className="max-w-7xl mx-auto px-4 pt-12">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">💸 Best Under ₹500</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {under500.map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Divider */}
-        <div className="border-t border-gray-200 my-12 max-w-6xl mx-auto" />
-
-        {/* CTA Button */}
-        <div className="text-center mb-12">
-          <Link to={`/collections/${tag}/all`}>
-            <button className="px-6 py-2 bg-black text-white rounded-full hover:bg-gray-900 transition font-medium shadow-md">
-              View All Products →
-            </button>
-          </Link>
-        </div>
+      {/* Quote & Description */}
+      <div className="max-w-4xl mx-auto py-10 px-6 text-center">
+        <blockquote className="text-xl italic text-gray-800 mb-6">{data.quote}</blockquote>
+        <p className="text-base text-gray-600 mb-4">{data.description}</p>
       </div>
     </div>
   );

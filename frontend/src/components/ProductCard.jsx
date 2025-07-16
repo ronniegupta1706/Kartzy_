@@ -6,6 +6,16 @@ const ProductCard = ({ product }) => {
   const { wishlist, addToWishlist } = useWishlist();
   const isWishlisted = wishlist.some(item => item._id === product._id);
 
+  const isCollection = product.type === 'collection';
+  const hasDiscount =
+    isCollection &&
+    product.originalPrice &&
+    product.originalPrice > product.price;
+
+  const discountPercent = hasDiscount
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : 0;
+
   return (
     <div className="bg-gray-100 shadow-md rounded-lg hover:shadow-lg cursor-pointer transition relative">
       <Link to={`/products/${product._id}`}>
@@ -16,16 +26,21 @@ const ProductCard = ({ product }) => {
         />
         <div className="p-4 bg-gray-50 rounded-b-lg">
           <h2 className="text-lg font-semibold mb-1">{product.name}</h2>
-          {product.originalPrice && (
-            <p className="text-sm text-gray-500 line-through">₹ {product.originalPrice}</p>
+
+          {hasDiscount && (
+            <p className="text-sm text-gray-500 line-through">
+              ₹ {product.originalPrice}
+            </p>
           )}
-          <p className="text-lg font-semibold text-red-500">₹  {product.price}</p>
+          <p className="text-lg font-semibold text-red-500">
+            ₹ {product.price}
+          </p>
         </div>
       </Link>
 
-      {product.originalPrice && (
+      {hasDiscount && discountPercent > 0 && (
         <div className="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full">
-          {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+          {discountPercent}% OFF
         </div>
       )}
 
