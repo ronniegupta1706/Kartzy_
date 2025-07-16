@@ -24,6 +24,9 @@ import AdminAnalytics from './pages/admin/AdminAnalytics';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
 
+import CollectionPage from './pages/Collections/CollectionPage';
+import CollectionAllProducts from './components/Collections/CollectionAllProducts';
+
 const App = () => {
   return (
     <>
@@ -34,6 +37,10 @@ const App = () => {
             <Route path="/home" element={<Home />} />
             <Route path="/products/:id" element={<ProductDetail />} />
             <Route path="/products/category/:categoryName" element={<CategoryProducts />} />
+            
+            <Route path="/products/tag/:tag" element={<CollectionPage />} />
+            <Route path="/collections/:tag/all" element={<CollectionAllProducts/>} />
+
             <Route path="/cart" element={<Cart />} />
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/search" element={<SearchResults />} />
