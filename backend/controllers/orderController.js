@@ -30,22 +30,6 @@ export const getUserOrders = async (req, res) => {
   }
 };
 
-export const cancelOrder = async (req, res) => {
-  try {
-    const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ message: 'Order not found' });
-    if (order.user.toString() !== req.user._id.toString())
-      return res.status(403).json({ message: 'Not authorized' });
-    if (order.isDelivered) return res.status(400).json({ message: 'Cannot cancel delivered order' });
-    order.isCancelled = true;
-    await order.save();
-    res.json({ message: 'Order cancelled' });
-  } catch (err) {
-    console.error('Cancel Order Error:', err);
-    res.status(500).json({ message: 'Server Error', error: err.message });
-  }
-};
-
 // — ADMIN CONTROLLERS —
 export const getAllOrders = async (req, res) => {
   try {
@@ -82,5 +66,30 @@ export const deleteOrder = async (req, res) => {
   } catch (err) {
     console.error('Delete Order Error:', err);
     res.status(500).json({ message: 'Server Error', error: err.message });
+  }
+};
+
+//cancellation of order
+
+export const cancelOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+
+    if (order.isDelivered)
+      return res.status(400).json({ message: 'Delivered order cannot be cancelled' });
+
+    if (order.isCancelled)
+      return res.status(400).json({ message: 'Order already cancelled' });
+
+    order.isCancelled = true;
+    order.cancelledBy = req.user.name || 'User';
+    order.cancelReason = req.body.cancelReason || 'No reason specified';
+
+    await order.save();
+    res.json({ message: 'Order cancelled successfully', order });
+  } catch (err) {
+    console.error('Cancel Order Error:', err);
+    res.status(500).json({ message: 'Server error' });
   }
 };

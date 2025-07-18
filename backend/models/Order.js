@@ -52,9 +52,12 @@ const orderSchema = new mongoose.Schema({
   },
   isCancelled: {
     type: Boolean,
-    required: true,
     default: false,
-  }
+  },
+  cancelledBy:
+  {
+    type:String
+  },
 }, { timestamps: true });
 
 const Order = mongoose.model('Order', orderSchema);
