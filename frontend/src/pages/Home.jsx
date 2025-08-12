@@ -1,7 +1,7 @@
 import React from 'react';
 import Hero from '../components/Hero';
 import Categories from '../components/Categories';
-import ProductList from './ProductList';
+import TrendingNow from '../components/TrendingNow';
 import ExploreCollections from '../components/ExploreCollections';
 import Footer from '../components/Footer';
 
@@ -21,7 +21,7 @@ const Home = () => {
       <ExploreCollections />
       <section className="px-4 py-10">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">🔥 Trending Now</h2>
-        <ProductList limit={8} />
+        <TrendingNow />
       </section>
       <Footer />
     </div>

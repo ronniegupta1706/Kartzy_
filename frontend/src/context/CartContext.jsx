@@ -1,9 +1,4 @@
-import React, { createContext, useReducer, useContext } from 'react';
-
-// Initial state
-const initialState = {
-  cartItems: [],
-};
+import React, { useReducer, createContext, useContext } from 'react';
 
 // Reducer
 const cartReducer = (state, action) => {
@@ -53,13 +48,14 @@ const CartContext = createContext();
 // Provider
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(
-  cartReducer,
-  { cartItems: [] },
-  (initial) => {
-    const stored = localStorage.getItem('cartItems');
-    return stored ? { cartItems: JSON.parse(stored) } : initial;
-  }
- ); // Initialize with localStorage so that on refresh, the cart persists and not reset
+    cartReducer,
+    { cartItems: [] },
+    (initial) => {
+      const stored = localStorage.getItem('cartItems');
+      return stored ? { cartItems: JSON.parse(stored) } : initial;
+    }
+  );
+
   return (
     <CartContext.Provider value={{ cartItems: state.cartItems, dispatch }}>
       {children}

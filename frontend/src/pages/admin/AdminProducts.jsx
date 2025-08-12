@@ -27,7 +27,6 @@ const AdminProducts = () => {
     image: '',
     brand: '',
     countInStock: '',
-    rating: '',
     type: 'category',
     tag: '',
     category: '',
@@ -80,7 +79,6 @@ const AdminProducts = () => {
       ...form,
       price: Number(form.price),
       countInStock: Number(form.countInStock),
-      rating: Number(form.rating),
       tag: form.type === 'collection' ? form.tag : '',
       category: form.type === 'category' ? form.category : '',
       originalPrice:
@@ -127,7 +125,6 @@ const AdminProducts = () => {
         image: '',
         brand: '',
         countInStock: '',
-        rating: '',
         type: 'category',
         tag: '',
         category: '',
@@ -148,7 +145,6 @@ const AdminProducts = () => {
       image: product.image,
       brand: product.brand,
       countInStock: product.countInStock,
-      rating: product.rating || '',
       type: product.type || 'category',
       tag: product.tag || '',
       category: product.category || '',
@@ -173,10 +169,10 @@ const AdminProducts = () => {
           onSubmit={handleSubmit}
           className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10 bg-white p-6 rounded-xl shadow"
         >
-          {['name', 'price', 'image', 'brand', 'countInStock', 'rating'].map((field) => (
+          {['name', 'price', 'image', 'brand', 'countInStock'].map((field) => (
             <input
               key={field}
-              type={['price', 'countInStock', 'rating'].includes(field) ? 'number' : 'text'}
+              type={['price', 'countInStock'].includes(field) ? 'number' : 'text'}
               placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
               value={form[field]}
               onChange={(e) => setForm({ ...form, [field]: e.target.value })}

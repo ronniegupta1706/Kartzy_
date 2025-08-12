@@ -8,6 +8,7 @@ const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
+  const [reviews, setReviews] = useState([]);
   const { cartItems, dispatch } = useCart();
   const { wishlist, addToWishlist } = useWishlist();
   const isWishlisted = wishlist.some(item => item._id === id);
@@ -21,7 +22,18 @@ const ProductDetail = () => {
         console.error('Error fetching product:', error);
       }
     };
+
+    const fetchReviews = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5001/api/reviews/product/${id}`);
+        setReviews(res.data);
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+      }
+    };
+
     fetchProduct();
+    fetchReviews();
   }, [id]);
 
   if (!product) return <div className="p-8 text-lg">Loading...</div>;
@@ -56,11 +68,16 @@ const ProductDetail = () => {
     navigate('/checkout');
   };
 
-  // 💡 Discount logic: if originalPrice > price
+  // Discount logic
   const hasDiscount = product.originalPrice && product.originalPrice > product.price;
   const discountPercent = hasDiscount
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
+
+  // Calculate average rating from reviews ONLY (ignore product.rating)
+  const avgRating = reviews.length
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : null;
 
   return (
     <div className="min-h-screen bg-yellow-50 py-10 px-4">
@@ -78,7 +95,6 @@ const ProductDetail = () => {
         <div className="flex-1">
           <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
 
-          {/* 💥 Show price + discount if available */}
           {hasDiscount ? (
             <div className="mb-2">
               <p className="text-sm text-gray-500 line-through">₹ {product.originalPrice}</p>
@@ -92,7 +108,13 @@ const ProductDetail = () => {
           )}
 
           <p className="text-sm text-gray-700 mb-1"><strong>Brand:</strong> {product.brand}</p>
-          <p className="text-sm text-gray-700 mb-1"><strong>Rating:</strong> ⭐ {product.rating} / 5</p>
+          <p className="text-sm text-gray-700 mb-1">
+            <strong>Rating:</strong> {avgRating ? (
+              <>⭐ {avgRating} / 5 ({reviews.length} review{reviews.length !== 1 ? 's' : ''})</>
+            ) : (
+              'No ratings yet'
+            )}
+          </p>
           <p className="text-sm text-gray-700 mb-2"><strong>Stock:</strong> {product.countInStock > 0 ? 'In Stock' : 'Out of Stock'}</p>
           <p className="text-gray-800 mb-4">{product.description}</p>
 
@@ -108,7 +130,7 @@ const ProductDetail = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-4 mb-8">
             <button
               onClick={handleAddToCart}
               className="bg-blue-600 hover:bg-blue-800 text-white px-6 py-2 rounded"
@@ -127,6 +149,29 @@ const ProductDetail = () => {
             >
               {isWishlisted ? 'Wishlisted ❤️' : 'Add to Wishlist'}
             </button>
+          </div>
+
+          {/* Reviews Section */}
+          <div>
+            <h3 className="text-xl font-semibold mb-4 border-b pb-2">Customer Reviews</h3>
+            {reviews.length === 0 && <p>No reviews yet. Be the first to review!</p>}
+
+            {reviews.map((review) => (
+              <div key={review._id} className="mb-4 border-b pb-3">
+                <div className="flex items-center mb-1">
+                  <strong>{review.userName || 'Anonymous'}</strong>
+                  <span className="ml-3 text-yellow-400">
+                    {[...Array(5)].map((_, idx) => (
+                      <span key={idx} className={idx < review.rating ? '' : 'text-gray-300'}>
+                        ★
+                      </span>
+                    ))}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-700 mb-1">{review.comment}</p>
+                <p className="text-xs text-gray-500">{new Date(review.createdAt).toLocaleDateString()}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

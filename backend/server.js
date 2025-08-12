@@ -11,6 +11,8 @@ import productRoutes from './routes/productRoutes.js';
 
 import adminRoutes from './routes/adminRoutes.js';
 
+import reviewRoutes from './routes/reviewRoutes.js';
+
 dotenv.config();
 const app = express();
 
@@ -29,6 +31,7 @@ app.use('/api/products', productRoutes);
 
 app.use('/api/admin', adminRoutes);    // admin dashboard and analytics
 
+app.use('/api/reviews', reviewRoutes); // product reviews
 // API check
 app.get('/', (req, res) => {
   res.send('API is running');

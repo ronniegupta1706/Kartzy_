@@ -35,6 +35,8 @@ const ProductCard = ({ product }) => {
           <p className="text-lg font-semibold text-red-500">
             ₹ {product.price}
           </p>
+
+          {/* Removed rating display here for accurate rating from reviews */}
         </div>
       </Link>
 

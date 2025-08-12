@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import loginImg from '../assets/login.png';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Signup = () => {
@@ -19,7 +19,6 @@ const Signup = () => {
 
     const { name, phone, email, password, confirmPassword } = form;
 
-    // Validation rules
     if (!name || !email || !phone || !password || !confirmPassword) {
       return alert('All fields are required.');
     }
@@ -41,7 +40,7 @@ const Signup = () => {
     }
 
     try {
-      const res = await axios.post('http://localhost:5001/api/users/register', {
+      await axios.post('http://localhost:5001/api/users/register', {
         name,
         phone,
         email,
@@ -65,7 +64,7 @@ const Signup = () => {
         <h2>Welcome to Kartzy!!!</h2>
       </div>
       <div className="absolute top-5 left-5 mx-10">
-        <img src="/Kartzy.jpg" className="w-32 h-32 p-2" />
+        <img src="/Kartzy.jpg" alt="Kartzy logo" className="w-32 h-32 p-2" />
       </div>
       <div className="bg-white shadow-lg rounded-2xl p-8 m-10 h-5/6 w-96">
         <h2 className="text-black opacity-100 font-bold text-2xl">SIGN UP</h2>

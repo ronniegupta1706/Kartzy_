@@ -15,7 +15,9 @@ const ProductList = ({ limit, category, filterBySale = false }) => {
       let data = res.data;
 
       if (filterBySale) {
-        data = data.filter(p => p.originalPrice && p.originalPrice > p.price);
+        data = data.filter(
+          p => p.originalPrice && p.originalPrice > p.price
+        );
       }
 
       setProducts(limit ? data.slice(0, limit) : data);
@@ -28,7 +30,7 @@ const ProductList = ({ limit, category, filterBySale = false }) => {
     <div className="min-h-screen bg-yellow-50 w-full py-10 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {products.map((product) => (
+          {products.map(product => (
             <ProductCard key={product._id} product={product} />
           ))}
         </div>

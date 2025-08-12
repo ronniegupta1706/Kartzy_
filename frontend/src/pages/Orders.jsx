@@ -1,4 +1,3 @@
-// src/pages/Orders.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -9,6 +8,9 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [cancelReason, setCancelReason] = useState({});
+  const [reviewInputs, setReviewInputs] = useState({}); // { orderId: { rating, comment } }
+  const [submittingReview, setSubmittingReview] = useState({}); // { orderId: bool }
+
   const cancelOptions = [
     'Ordered by mistake',
     'Found a better price',
@@ -29,15 +31,14 @@ const Orders = () => {
 
   const fetchOrders = async () => {
     try {
+      setLoading(true);
       const res = await fetch('http://localhost:5001/api/orders/myorders', {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to fetch orders");
-
       setOrders(data);
     } catch (err) {
       toast.error(err.message || "Failed to fetch orders");
@@ -71,6 +72,36 @@ const Orders = () => {
       fetchOrders();
     } catch (err) {
       toast.error(err.message || 'Failed to cancel order');
+    }
+  };
+
+  // Review submit handler per order
+  const submitReview = async (orderId) => {
+    const { rating, comment } = reviewInputs[orderId] || {};
+    if (!rating || !comment?.trim()) {
+      toast.error('Please provide rating and comment to submit review.');
+      return;
+    }
+    setSubmittingReview(prev => ({ ...prev, [orderId]: true }));
+    try {
+      const res = await fetch(`http://localhost:5001/api/reviews/${orderId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({ rating, comment }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to submit review');
+      toast.success('Review submitted successfully');
+      // Clear review inputs for this order
+      setReviewInputs(prev => ({ ...prev, [orderId]: { rating: 0, comment: '' } }));
+      fetchOrders();
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setSubmittingReview(prev => ({ ...prev, [orderId]: false }));
     }
   };
 
@@ -131,6 +162,7 @@ const Orders = () => {
               Total: ₹{order.totalPrice.toFixed(2)}
             </div>
 
+            {/* Cancel order if not delivered or cancelled */}
             {!order.isDelivered && !order.isCancelled && (
               <div className="mt-4 flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
                 <select
@@ -149,6 +181,79 @@ const Orders = () => {
                 >
                   Cancel Order
                 </button>
+              </div>
+            )}
+
+            {/* Review form - only if delivered and not cancelled and no existing review */}
+            {order.isDelivered && !order.isCancelled && !order.review && (
+              <div className="mt-6 border-t pt-4">
+                <h4 className="font-semibold mb-2">Leave a Review</h4>
+                <div className="flex items-center space-x-3 mb-2">
+                  <label className="font-medium">Rating:</label>
+                  {[1,2,3,4,5].map(star => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() =>
+                        setReviewInputs(prev => ({
+                          ...prev,
+                          [order._id]: {
+                            ...prev[order._id],
+                            rating: star
+                          }
+                        }))
+                      }
+                      className={`text-2xl cursor-pointer ${
+                        reviewInputs[order._id]?.rating >= star
+                          ? 'text-yellow-400'
+                          : 'text-gray-300'
+                      }`}
+                      aria-label={`${star} star`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  rows={3}
+                  placeholder="Write your review..."
+                  value={reviewInputs[order._id]?.comment || ''}
+                  onChange={e =>
+                    setReviewInputs(prev => ({
+                      ...prev,
+                      [order._id]: {
+                        ...prev[order._id],
+                        comment: e.target.value
+                      }
+                    }))
+                  }
+                  className="w-full border rounded px-3 py-2 mb-2"
+                />
+                <button
+                  onClick={() => submitReview(order._id)}
+                  disabled={submittingReview[order._id]}
+                  className={`px-4 py-2 rounded text-white ${
+                    submittingReview[order._id] ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
+                >
+                  {submittingReview[order._id] ? 'Submitting...' : 'Submit Review'}
+                </button>
+              </div>
+            )}
+
+            {/* Show existing review if any */}
+            {order.review && (
+              <div className="mt-6 border-t pt-4 bg-green-50 p-3 rounded">
+                <h4 className="font-semibold mb-1">Your Review</h4>
+                <div className="flex items-center space-x-2 mb-1">
+                  <span>Rating:</span>
+                  {[...Array(5)].map((_, idx) => (
+                    <span key={idx} className={idx < order.review.rating ? 'text-yellow-400' : 'text-gray-300'}>
+                      ★
+                    </span>
+                  ))}
+                </div>
+                <p>{order.review.comment}</p>
               </div>
             )}
           </div>
