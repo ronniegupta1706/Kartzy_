@@ -26,6 +26,9 @@ import AdminRoute from './components/AdminRoute';
 
 import CollectionPage from './pages/Collections/CollectionPage';
 import CollectionAllProducts from './components/Collections/CollectionAllProducts';
+import ResetPassword from './pages/ResetPassword';
+import ForgotPassword from './pages/ForgotPassword';
+
 
 const App = () => {
   return (
@@ -57,6 +60,8 @@ const App = () => {
           <Route path="/" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/admin-login" element={<AdminLogin />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           {/* Protected Admin Routes */}
           <Route element={<AdminRoute />}>

@@ -1,21 +1,23 @@
-import User from '../models/User.js';
-import bcrypt from 'bcryptjs';
+import express from 'express';
 import crypto from 'crypto';
-import generateToken from '../utils/generateToken.js';
+import User from '../models/User.js';
 import { sendEmail } from '../utils/sendEmail.js';
+import bcrypt from 'bcryptjs';
+import generateToken from '../utils/generateToken.js';
 
-// Register user
-export const registerUser = async (req, res) => {
+const router = express.Router();
+
+/**
+ * @route POST /api/auth/register
+ */
+router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: 'User already exists' });
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    const user = await User.create({ name, email, password: hashedPassword });
+    const user = await User.create({ name, email, password });
 
     res.status(201).json({
       _id: user._id,
@@ -27,10 +29,12 @@ export const registerUser = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
-};
+});
 
-// Login user
-export const loginUser = async (req, res) => {
+/**
+ * @route POST /api/auth/login
+ */
+router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -51,10 +55,12 @@ export const loginUser = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
-};
+});
 
-// Forgot Password
-export const forgotPassword = async (req, res) => {
+/**
+ * @route POST /api/auth/forgot-password
+ */
+router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
 
   try {
@@ -72,27 +78,29 @@ export const forgotPassword = async (req, res) => {
 
     const message = `
       <h2>Password Reset Request</h2>
-      <p>Please click the link below to reset your password. This link is valid for 1 hour.</p>
+      <p>Click below to reset your password. This link is valid for 1 hour.</p>
       <a href="${resetUrl}">${resetUrl}</a>
     `;
 
-    await sendEmail({ to: user.email, subject: 'Password Reset', html: message });
+    await sendEmail({ to: user.email, subject: 'Password Reset Link', html: message });
 
     res.json({ message: 'Password reset email sent' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
-};
+});
 
-// Reset Password
-export const resetPassword = async (req, res) => {
+/**
+ * @route POST /api/auth/reset-password/:token
+ */
+router.post('/reset-password/:token', async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
 
-  const resetTokenHash = crypto.createHash('sha256').update(token).digest('hex');
-
   try {
+    const resetTokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
     const user = await User.findOne({
       passwordResetToken: resetTokenHash,
       passwordResetExpires: { $gt: Date.now() },
@@ -100,9 +108,7 @@ export const resetPassword = async (req, res) => {
 
     if (!user) return res.status(400).json({ message: 'Invalid or expired token' });
 
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(password, salt);
-
+    user.password = password; // Will be hashed by pre-save hook
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
 
@@ -113,4 +119,6 @@ export const resetPassword = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
-};
+});
+
+export default router;
