@@ -29,6 +29,14 @@ import CollectionAllProducts from './components/Collections/CollectionAllProduct
 import ResetPassword from './pages/ResetPassword';
 import ForgotPassword from './pages/ForgotPassword';
 
+import About from './pages/About';
+import Contact from './pages/Contact';
+import FAQs from './pages/FAQs';
+
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import ReturnPolicy from './pages/ReturnPolicy';
+import ShippingInfo from './pages/ShippingInfo';
+import Terms from './pages/Terms';
 
 const App = () => {
   return (
@@ -62,7 +70,13 @@ const App = () => {
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
-
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/faq" element={<FAQs />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/return-policy" element={<ReturnPolicy />} />
+          <Route path="/shipping-info" element={<ShippingInfo />} />
+          <Route path="/terms" element={<Terms />} />
           {/* Protected Admin Routes */}
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminDashboard />} />

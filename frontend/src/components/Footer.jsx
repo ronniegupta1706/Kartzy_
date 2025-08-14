@@ -6,6 +6,7 @@ const Footer = () => {
   return (
     <footer className="bg-gray-900 text-gray-300 pt-10 px-6">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
+        
         {/* Brand Info */}
         <div>
           <h2 className="text-xl font-bold text-white mb-4">Kartzy</h2>
@@ -19,7 +20,15 @@ const Footer = () => {
         <div>
           <h3 className="text-lg font-semibold text-white mb-3">Quick Links</h3>
           <ul className="space-y-2 text-sm">
-            <li><Link to="/home" className="hover:text-white">Home</Link></li>
+            <li>
+              <Link 
+                to="/home" 
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} 
+                className="hover:text-white"
+              >
+                Home
+              </Link>
+            </li>
             <li><Link to="/about" className="hover:text-white">About</Link></li>
             <li><Link to="/contact" className="hover:text-white">Contact</Link></li>
             <li><Link to="/faq" className="hover:text-white">FAQs</Link></li>
@@ -31,8 +40,8 @@ const Footer = () => {
           <h3 className="text-lg font-semibold text-white mb-3">Customer Service</h3>
           <ul className="space-y-2 text-sm">
             <li><Link to="/return-policy" className="hover:text-white">Return Policy</Link></li>
-            <li><Link to="/privacy" className="hover:text-white">Privacy Policy</Link></li>
-            <li><Link to="/shipping" className="hover:text-white">Shipping Info</Link></li>
+            <li><Link to="/privacy-policy" className="hover:text-white">Privacy Policy</Link></li>
+            <li><Link to="/shipping-info" className="hover:text-white">Shipping Info</Link></li>
             <li><Link to="/terms" className="hover:text-white">Terms of Service</Link></li>
           </ul>
         </div>
@@ -49,10 +58,11 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Bottom Logo and Copyright */}
+      {/* Bottom section */}
       <div className="mt-10 border-t border-gray-700 pt-6 text-center">
-       
-        <p className="text-sm text-gray-500">© {new Date().getFullYear()} Kartzy. All rights reserved.</p>
+        <p className="text-sm text-gray-500">
+          © {new Date().getFullYear()} Kartzy. All rights reserved.
+        </p>
       </div>
     </footer>
   );
