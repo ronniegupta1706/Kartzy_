@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { FaCreditCard, FaUniversity, FaMoneyBillWave, FaMobileAlt } from 'react-icons/fa';
+import { SiPhonepe, SiGooglepay, SiPaytm } from 'react-icons/si';
 
 const Checkout = () => {
   const { cartItems, dispatch } = useCart();
@@ -14,6 +16,16 @@ const Checkout = () => {
   const [newAddress, setNewAddress] = useState({ label: '', details: '' });
   const [showNewAddress, setShowNewAddress] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('');
+
+  // Payment inputs
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardName, setCardName] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCVV, setCardCVV] = useState('');
+  const [upiId, setUpiId] = useState('');
+  const [bankName, setBankName] = useState('');
+  const [bankUsername, setBankUsername] = useState('');
+  const [bankPIN, setBankPIN] = useState('');
 
   const { mode, singleItem } = location.state || {};
   const itemsToOrder = mode === 'single' && singleItem ? [singleItem] : cartItems;
@@ -29,7 +41,6 @@ const Checkout = () => {
       navigate('/login');
       return;
     }
-
     setUser(userInfo);
     const addressKey = `addresses_${userInfo.email}`;
     const saved = JSON.parse(localStorage.getItem(addressKey)) || [];
@@ -42,7 +53,6 @@ const Checkout = () => {
       toast.error('Please enter both label and address');
       return;
     }
-
     const addressKey = `addresses_${user.email}`;
     const updated = [...addresses, newAddress];
     setAddresses(updated);
@@ -52,12 +62,17 @@ const Checkout = () => {
     setShowNewAddress(false);
   };
 
+  const handleCardNumberChange = (e) => {
+    let value = e.target.value.replace(/\D/g, '');
+    value = value.match(/.{1,4}/g)?.join(' ') || '';
+    setCardNumber(value);
+  };
+
   const handlePlaceOrder = async () => {
     if (!selectedAddress || !paymentMethod) {
       toast.error("Please select address and payment method");
       return;
     }
-
     try {
       const res = await fetch("http://localhost:5001/api/orders", {
         method: "POST",
@@ -96,13 +111,14 @@ const Checkout = () => {
         }
       }
 
+      const orderData = await res.json();
       if (mode === 'single' && singleItem) {
         dispatch({ type: 'REMOVE_FROM_CART', payload: singleItem._id });
       } else {
         dispatch({ type: 'CLEAR_CART' });
       }
 
-      toast.success("Order placed successfully!");
+      toast.success(`Payment successful! Payment ID: ${orderData._id || 'N/A'}`);
       navigate("/orders");
 
     } catch (error) {
@@ -133,7 +149,10 @@ const Checkout = () => {
                 <strong>{addr.label}:</strong> {addr.details}
               </label>
             ))}
-            <button className="text-blue-600 mt-2" onClick={() => setShowNewAddress(!showNewAddress)}>
+            <button
+              className="text-blue-600 mt-2"
+              onClick={() => setShowNewAddress(!showNewAddress)}
+            >
               {showNewAddress ? 'Cancel' : '➕ Add New Address'}
             </button>
 
@@ -152,7 +171,10 @@ const Checkout = () => {
                   onChange={e => setNewAddress({ ...newAddress, details: e.target.value })}
                   className="border px-2 py-1 w-full rounded"
                 />
-                <button onClick={handleAddNewAddress} className="bg-blue-600 text-white px-4 py-1 rounded">
+                <button
+                  onClick={handleAddNewAddress}
+                  className="bg-blue-600 text-white px-4 py-1 rounded"
+                >
                   Save Address
                 </button>
               </div>
@@ -161,19 +183,125 @@ const Checkout = () => {
 
           {/* Payment Method Section */}
           <div className="bg-white p-4 rounded shadow">
-            <h2 className="text-lg font-semibold mb-2">🏦 Select Payment Method</h2>
-            {["Cash on Delivery", "Credit/Debit Card", "UPI", "Net Banking"].map(method => (
-              <label key={method} className="block mb-2">
+            <h2 className="text-lg font-semibold mb-4">🏦 Select Payment Method</h2>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: "Cash on Delivery", icon: <FaMoneyBillWave className="text-green-600" /> },
+                { label: "Credit/Debit Card", icon: <FaCreditCard className="text-blue-600" /> },
+                { label: "UPI", icon: <FaMobileAlt className="text-purple-600" /> },
+                { label: "Net Banking", icon: <FaUniversity className="text-orange-600" /> },
+              ].map(method => (
+                <div
+                  key={method.label}
+                  onClick={() => setPaymentMethod(method.label)}
+                  className={`cursor-pointer border rounded p-3 flex items-center gap-2 hover:border-blue-500 ${
+                    paymentMethod === method.label ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+                  }`}
+                >
+                  {method.icon}
+                  <span>{method.label}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Card UI */}
+            {paymentMethod === "Credit/Debit Card" && (
+              <div className="mt-4 space-y-2 p-4 bg-gray-50 rounded shadow-inner">
                 <input
-                  type="radio"
-                  name="payment"
-                  checked={paymentMethod === method}
-                  onChange={() => setPaymentMethod(method)}
-                  className="mr-2"
+                  type="text"
+                  placeholder="Card Number"
+                  value={cardNumber}
+                  onChange={handleCardNumberChange}
+                  maxLength={19}
+                  className="border px-2 py-1 w-full rounded"
                 />
-                {method}
-              </label>
-            ))}
+                <input
+                  type="text"
+                  placeholder="Cardholder Name"
+                  value={cardName}
+                  onChange={e => setCardName(e.target.value)}
+                  className="border px-2 py-1 w-full rounded"
+                />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="MM/YY"
+                    value={cardExpiry}
+                    onChange={e => setCardExpiry(e.target.value)}
+                    className="border px-2 py-1 w-1/2 rounded"
+                  />
+                  <input
+                    type="text"
+                    placeholder="CVV"
+                    value={cardCVV}
+                    onChange={e => setCardCVV(e.target.value)}
+                    className="border px-2 py-1 w-1/2 rounded"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* UPI UI */}
+            {paymentMethod === "UPI" && (
+              <div className="mt-4 space-y-3 p-4 bg-gray-50 rounded shadow-inner">
+                <div className="flex gap-4 text-3xl">
+                  <SiPhonepe className="text-purple-600" />
+                  <SiGooglepay className="text-blue-600" />
+                  <SiPaytm className="text-sky-500" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Enter UPI ID"
+                  value={upiId}
+                  onChange={e => setUpiId(e.target.value)}
+                  className="border px-2 py-1 w-full rounded"
+                />
+              </div>
+            )}
+
+            {/* Net Banking UI */}
+            {paymentMethod === "Net Banking" && (
+              <div className="mt-4 space-y-3 p-4 bg-gray-50 rounded shadow-inner">
+                <h3 className="text-sm font-semibold mb-2">Select Your Bank</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { name: "SBI", icon: "🏦" },
+                    { name: "HDFC Bank", icon: "💳" },
+                    { name: "ICICI Bank", icon: "🏛️" },
+                    { name: "Axis Bank", icon: "💰" },
+                  ].map((bank) => (
+                    <div
+                      key={bank.name}
+                      onClick={() => setBankName(bank.name)}
+                      className={`cursor-pointer border rounded p-3 flex items-center gap-2 hover:border-blue-500 ${
+                        bankName === bank.name ? "border-blue-500 bg-white" : "border-gray-300"
+                      }`}
+                    >
+                      <span className="text-2xl">{bank.icon}</span>
+                      <span className="text-sm font-medium">{bank.name}</span>
+                    </div>
+                  ))}
+                </div>
+                {bankName && (
+                  <div className="mt-3 space-y-2">
+                    <input
+                      type="text"
+                      placeholder="Username"
+                      value={bankUsername}
+                      onChange={e => setBankUsername(e.target.value)}
+                      className="border px-2 py-1 w-full rounded"
+                    />
+                    <input
+                      type="password"
+                      placeholder="PIN"
+                      value={bankPIN}
+                      onChange={e => setBankPIN(e.target.value)}
+                      className="border px-2 py-1 w-full rounded"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
