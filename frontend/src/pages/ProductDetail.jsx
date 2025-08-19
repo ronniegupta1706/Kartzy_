@@ -60,12 +60,8 @@ const ProductDetail = () => {
       return;
     }
 
-    const existingItem = cartItems.find(item => item._id === product._id);
-    if (!existingItem || existingItem.quantity < product.countInStock) {
-      dispatch({ type: 'ADD_TO_CART', payload: product });
-    }
-
-    navigate('/checkout');
+    // ✅ Send only this product to checkout, without adding to cart
+    navigate('/checkout', { state: { mode: 'single', singleItem: { ...product, quantity: 1 } } });
   };
 
   // Discount logic
@@ -74,7 +70,6 @@ const ProductDetail = () => {
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0;
 
-  // Calculate average rating from reviews ONLY (ignore product.rating)
   const avgRating = reviews.length
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : null;

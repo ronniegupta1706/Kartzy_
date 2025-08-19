@@ -113,6 +113,7 @@ const Checkout = () => {
 
       const orderData = await res.json();
       if (mode === 'single' && singleItem) {
+        // Do not clear cart if single product checkout
         dispatch({ type: 'REMOVE_FROM_CART', payload: singleItem._id });
       } else {
         dispatch({ type: 'CLEAR_CART' });
@@ -309,8 +310,11 @@ const Checkout = () => {
         <div className="w-full md:w-1/3 bg-white p-4 rounded shadow">
           <h2 className="text-lg font-semibold mb-4">🧾 Order Summary</h2>
           {itemsToOrder.map(item => (
-            <div key={item._id} className="mb-2 flex justify-between">
-              <span>{item.title} x {item.quantity}</span>
+            <div key={item._id} className="mb-2 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <img src={item.image} alt={item.name} className="w-10 h-10 object-contain rounded" />
+                <span>{item.name} * {item.quantity}</span>
+              </div>
               <span>₹{item.price * item.quantity}</span>
             </div>
           ))}
