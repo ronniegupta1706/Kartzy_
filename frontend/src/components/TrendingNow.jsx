@@ -1,123 +1,141 @@
-import React from 'react';
-import { Link } from 'react-router-dom';  // for clickable product cards
+// src/components/TrendingNow.jsx
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import Slider from 'react-slick';
 
-const trendingProducts = [
-  {
-    id: 1,
-    name: "Epson Projector",
-    brand: "Epson",
-    price: 8999,
-    originalPrice: 12999,
-    image: "/images/trending/projector.png",
-  },
-  {
-    id: 2,
-    name: "MuscleBlaze Whey Protein Shake (1kg)",
-    brand: "MuscleBlaze",
-    price: 1499,
-    originalPrice: 1899,
-    image: "/images/trending/protein.png",
-  },
-  {
-    id: 3,
-    name: "Classmate Notebooks Set of 6",
-    brand: "Classmate",
-    price: 299,
-    originalPrice: 399,
-    image: "/images/trending/classmate.png",
-  },
-  {
-    id: 4,
-    name: "Sleepwell Mattress",
-    brand: "Sleepwell",
-    price: 7999,
-    originalPrice: 9999,
-    image: "/images/trending/mattress.png",
-  },
-  {
-    id: 5,
-    name: "Philips Trimmer",
-    brand: "Philips",
-    price: 1199,
-    originalPrice: 1699,
-    image: "/images/trending/trimmer.png",
-  },
-  {
-    id: 6,
-    name: "Titan Wall Clock",
-    brand: "Titan",
-    price: 499,
-    originalPrice: 799,
-    image: "/images/trending/clock.png",
-  },
-  {
-    id: 7,
-    name: "RainShield Umbrella",
-    brand: "RainShield",
-    price: 299,
-    originalPrice: 499,
-    image: "/images/trending/umbrella.png",
-  },
-  {
-    id: 8,
-    name: "Prestige Pressure Cooker",
-    brand: "Prestige",
-    price: 1499,
-    originalPrice: 1999,
-    image: "/images/trending/cooker.png",
-  },
-];
+const Card = ({ p }) => (
+  <Link
+    to={`/products/${p._id}`}
+    className="block bg-white p-4 rounded-xl shadow hover:shadow-2xl transition-all duration-300 h-full"
+  >
+    <div className="w-full h-48 flex items-center justify-center mb-3 overflow-hidden rounded-lg bg-gray-100">
+      <img src={p.image} alt={p.name} className="object-contain max-h-full max-w-full" />
+    </div>
+
+    <h3 className="font-semibold text-base md:text-lg text-gray-900 line-clamp-2">{p.name}</h3>
+    <p className="text-xs md:text-sm text-gray-500 mb-1">by {p.brand}</p>
+
+    <div className="mt-2">
+      <span className="text-red-600 font-bold text-lg">₹{p.price}</span>
+      {p.originalPrice && p.originalPrice > p.price && (
+        <span className="ml-2 text-gray-400 line-through">₹{p.originalPrice}</span>
+      )}
+      {typeof p.discountPercent === 'number' && p.discountPercent > 0 && (
+        <span className="ml-2 text-green-600 font-medium">-{p.discountPercent}%</span>
+      )}
+    </div>
+
+    <div className="mt-2 text-sm text-yellow-500 font-medium">
+      ⭐ {p.rating?.toFixed(1) ?? 0} ({p.numreviews ?? 0})
+    </div>
+  </Link>
+);
+
+const useFetch = (url) => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const run = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+        const res = await fetch(url, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!res.ok) throw new Error('Failed to fetch');
+        const json = await res.json();
+        if (!cancelled) setData(Array.isArray(json) ? json : []);
+      } catch (e) {
+        if (!cancelled) setError(e.message || 'Something went wrong');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    run();
+    return () => { cancelled = true; };
+  }, [url]);
+
+  return { data, loading, error };
+};
 
 const TrendingNow = () => {
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 justify-center">
-      {trendingProducts.map(product => (
-        <Link
-          to={`/products/${product.id}`}
-          key={product.id}
-          className="bg-white p-4 rounded shadow hover:shadow-lg transition cursor-pointer block max-w-[220px] mx-auto relative"
-          style={{ minHeight: '320px' }}
-        >
-          {/* Trending badge moved outside image container */}
-          <div
-            className="absolute -top-3 left-0 bg-yellow-400 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md select-none whitespace-nowrap"
-            style={{ transform: 'translateX(-50%)' }}
-          >
-            TRENDING
-          </div>
+  // fetch both lists
+  const picks = useFetch('http://localhost:5001/api/products/trending-and-related?limit=8');
+  const also  = useFetch('http://localhost:5001/api/products/also-like?limit=8');
 
-          <div
-            style={{
-              height: '180px',
-              width: '220px',
-              margin: '0 auto 0.5rem auto',
-              overflow: 'hidden',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '6px',
-              backgroundColor: '#fff',
-            }}
-          >
-            <img
-              src={product.image}
-              alt={product.name}
-              className="object-contain rounded"
-              style={{ maxHeight: '100%', maxWidth: '100%' }}
-            />
-          </div>
-          <h3 className="text-lg font-extrabold tracking-wide text-gray-900 font-sans">
-            {product.name}
-          </h3>
-          <p className="text-sm text-gray-600 mb-1 italic font-light tracking-wide">by {product.brand}</p>
-          <div className="mt-1">
-            <span className="text-red-600 font-bold text-lg">₹{product.price}</span>
-            {product.originalPrice && product.originalPrice > product.price && (
-              <span className="ml-2 text-gray-500 line-through font-medium">₹{product.originalPrice}</span>
-            )}
-          </div>
-        </Link>
-      ))}
+  // avoid duplicates across the two lists
+  const alsoFiltered = useMemo(() => {
+    const ids = new Set((picks.data || []).map(p => String(p._id)));
+    return (also.data || []).filter(p => !ids.has(String(p._id)));
+  }, [picks.data, also.data]);
+
+  const sliderSettings = {
+    dots: true,
+    infinite: false,          // no repeats
+    speed: 550,
+    slidesToShow: 3,
+    slidesToScroll: 1,
+    autoplay: false,
+    responsive: [
+      { breakpoint: 1024, settings: { slidesToShow: 2, slidesToScroll: 1 } },
+      { breakpoint: 768,  settings: { slidesToShow: 1, slidesToScroll: 1 } },
+    ],
+  };
+
+  return (
+    <div className="space-y-12">
+      {/* Top Picks */}
+      <section className="bg-gradient-to-r from-yellow-50 via-yellow-100 to-yellow-50 rounded-xl p-6 shadow-lg">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900">
+            🔥 Top Picks For You
+          </h2>
+          <span className="text-xs md:text-sm text-gray-600">Personalized & fresh</span>
+        </div>
+
+        {picks.loading ? (
+          <div className="py-8 text-center">Loading your picks…</div>
+        ) : picks.error ? (
+          <div className="py-8 text-center text-red-600">{picks.error}</div>
+        ) : picks.data.length === 0 ? (
+          <div className="py-8 text-center">No products available.</div>
+        ) : (
+          <Slider {...sliderSettings}>
+            {picks.data.map(p => (
+              <div key={p._id} className="px-3"><Card p={p} /></div>
+            ))}
+          </Slider>
+        )}
+      </section>
+
+      {/* You May Also Like */}
+      <section className="bg-gradient-to-r from-yellow-50 via-yellow-100 to-yellow-50 rounded-xl p-6 shadow-lg">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900">
+            ✨ You May Also Like
+          </h2>
+          <span className="text-xs md:text-sm text-gray-600">Similar to what you browse & buy</span>
+        </div>
+
+        {also.loading ? (
+          <div className="py-8 text-center">Loading suggestions…</div>
+        ) : also.error ? (
+          <div className="py-8 text-center text-red-600">{also.error}</div>
+        ) : alsoFiltered.length === 0 ? (
+          <div className="py-8 text-center">No suggestions right now.</div>
+        ) : (
+          <Slider {...sliderSettings}>
+            {alsoFiltered.map(p => (
+              <div key={p._id} className="px-3"><Card p={p} /></div>
+            ))}
+          </Slider>
+        )}
+      </section>
     </div>
   );
 };

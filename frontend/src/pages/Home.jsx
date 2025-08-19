@@ -1,3 +1,4 @@
+// src/pages/Home.jsx
 import React from 'react';
 import Hero from '../components/Hero';
 import Categories from '../components/Categories';
@@ -19,10 +20,12 @@ const Home = () => {
       <Categories />
       <PromoBanner />
       <ExploreCollections />
+
+      {/* Personalized carousels */}
       <section className="px-4 py-10">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">🔥 Trending Now</h2>
         <TrendingNow />
       </section>
+
       <Footer />
     </div>
   );

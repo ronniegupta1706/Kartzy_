@@ -1,6 +1,11 @@
+// controllers/productController.js
 import Product from '../models/Product.js';
+import Order from '../models/Order.js';
 
-// Get all products
+/* ==========================
+   BASIC PRODUCT HANDLERS
+========================== */
+
 export const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
@@ -10,7 +15,6 @@ export const getAllProducts = async (req, res) => {
   }
 };
 
-// Get product by ID
 export const getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -21,13 +25,10 @@ export const getProductById = async (req, res) => {
   }
 };
 
-// Search products by name
 export const searchProducts = async (req, res) => {
   try {
     const keyword = req.query.q?.trim();
-    if (!keyword) {
-      return res.status(400).json({ message: 'No search keyword provided' });
-    }
+    if (!keyword) return res.status(400).json({ message: 'No search keyword provided' });
 
     const products = await Product.find({
       name: { $regex: keyword, $options: 'i' },
@@ -40,7 +41,6 @@ export const searchProducts = async (req, res) => {
   }
 };
 
-// Create a new product (supports category & collection)
 export const createProduct = async (req, res) => {
   try {
     const {
@@ -54,7 +54,7 @@ export const createProduct = async (req, res) => {
       countInStock,
       type,
       tag,
-      rating, // ✅ Added
+      rating,
     } = req.body;
 
     if (!name || !price || !description || !image || !brand || !countInStock || !type) {
@@ -86,7 +86,7 @@ export const createProduct = async (req, res) => {
       image,
       brand,
       countInStock: Number(countInStock),
-      rating: rating !== undefined ? Number(rating) : 0, // ✅ Safe fallback
+      rating: rating !== undefined ? Number(rating) : 0,
       type,
       category: type === 'category' ? category : undefined,
       tag: type === 'collection' ? tag : undefined,
@@ -100,12 +100,10 @@ export const createProduct = async (req, res) => {
   }
 };
 
-// Update product
 export const updateProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    if (!product)
-      return res.status(404).json({ message: 'Product not found' });
+    if (!product) return res.status(404).json({ message: 'Product not found' });
 
     const {
       name,
@@ -149,12 +147,10 @@ export const updateProduct = async (req, res) => {
   }
 };
 
-// Delete product
 export const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    if (!product)
-      return res.status(404).json({ message: 'Product not found' });
+    if (!product) return res.status(404).json({ message: 'Product not found' });
 
     await product.deleteOne();
     res.json({ message: 'Product deleted' });
@@ -163,21 +159,139 @@ export const deleteProduct = async (req, res) => {
   }
 };
 
-// Get products by collection tag
 export const getProductsByTag = async (req, res) => {
   try {
     const tag = req.params.tag.toLowerCase();
+    const products = await Product.find({ type: 'collection', tag });
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch products by tag', error: err.message });
+  }
+};
 
-    const products = await Product.find({
-      type: 'collection',
-      tag: tag,
-    });
+export const getTrendingProducts = async (req, res) => {
+  try {
+    const { type = 'top_rated', category, limit = '12' } = req.query;
+
+    const query = {};
+    if (category) query.category = category;
+
+    let sort = {};
+    switch (type) {
+      case 'most_reviewed':
+        sort = { numreviews: -1, rating: -1 };
+        break;
+      case 'new_arrivals':
+        sort = { createdAt: -1 };
+        break;
+      case 'best_deals':
+        sort = { discountPercent: -1, rating: -1, numreviews: -1 };
+        break;
+      case 'top_rated':
+      default:
+        sort = { rating: -1, numreviews: -1 };
+        break;
+    }
+
+    const l = Math.min(parseInt(limit, 10) || 12, 24);
+    const products = await Product.find(query).sort(sort).limit(l);
 
     res.json(products);
   } catch (err) {
-    res.status(500).json({
-      message: 'Failed to fetch products by tag',
-      error: err.message,
-    });
+    console.error('TRENDING ERROR:', err);
+    res.status(500).json({ message: 'Failed to fetch trending products', error: err.message });
+  }
+};
+
+/* ==========================
+   PERSONALIZED CAROUSELS
+========================== */
+
+// 1) Top Picks for You (personalized, fallback to “popular”)
+export const getTrendingAndRelated = async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 8, 12);
+
+    // Try to personalize using user order history if available (req.user optional)
+    let picks = [];
+
+    if (req.user?._id) {
+      const orders = await Order.find({ user: req.user._id })
+        .populate('orderItems.product')
+        .lean();
+
+      const categories = new Set();
+      orders.forEach(o =>
+        o.orderItems.forEach(oi => {
+          if (oi.product?.category) categories.add(oi.product.category);
+        })
+      );
+
+      if (categories.size) {
+        // Random sample from those categories (avoid “the same few”)
+        const byCats = await Product.aggregate([
+          { $match: { type: 'category', category: { $in: [...categories] } } },
+          { $sample: { size: limit } },
+        ]);
+        picks = byCats;
+      }
+    }
+
+    // Fallback: overall popular (most reviewed)
+    if (picks.length === 0) {
+      picks = await Product.find({ type: 'category' })
+        .sort({ numreviews: -1, rating: -1 })
+        .limit(limit)
+        .lean();
+    }
+
+    res.json(picks);
+  } catch (err) {
+    console.error('Error in getTrendingAndRelated:', err);
+    res.status(500).json({ message: 'Failed to fetch personalized picks' });
+  }
+};
+
+// 2) You May Also Like (related-but-different, no repeats)
+export const getAlsoLike = async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 8, 12);
+
+    // Build a category pool from recent orders (if any)
+    let categories = [];
+    if (req.user?._id) {
+      const orders = await Order.find({ user: req.user._id })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate('orderItems.product')
+        .lean();
+
+      const set = new Set();
+      orders.forEach(o =>
+        o.orderItems.forEach(oi => {
+          if (oi.product?.category) set.add(oi.product.category);
+        })
+      );
+      categories = [...set];
+    }
+
+    let results;
+    if (categories.length) {
+      results = await Product.aggregate([
+        { $match: { type: 'category', category: { $in: categories } } },
+        { $sample: { size: limit } },
+      ]);
+    } else {
+      // Guest or no orders yet → diversify by random set
+      results = await Product.aggregate([
+        { $match: { type: 'category' } },
+        { $sample: { size: limit } },
+      ]);
+    }
+
+    res.json(results);
+  } catch (err) {
+    console.error('Error in getAlsoLike:', err);
+    res.status(500).json({ message: 'Failed to fetch also-like products' });
   }
 };

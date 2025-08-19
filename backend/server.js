@@ -14,6 +14,7 @@ import adminRoutes from './routes/adminRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import authRoutes from './routes/auth.js';
 
+
 dotenv.config();
 const app = express();
 
@@ -34,6 +35,8 @@ app.use('/api/admin', adminRoutes);    // admin dashboard and analytics
 
 app.use('/api/reviews', reviewRoutes); // product reviews
 app.use('/api/auth', authRoutes);      // authentication routes
+
+
 // API check
 app.get('/', (req, res) => {
   res.send('API is running');
@@ -70,6 +73,28 @@ app.get('/api/products/category/:categoryName', async (req, res) => {
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+app.get('/api/trending', async (req, res) => {
+  try {
+    const { type = 'top_rated', category, limit = '12' } = req.query;
+
+    // we only implement "top_rated" in step 1 (works with your current schema)
+    const q = {};
+    if (category) q.category = category;
+
+    const l = Math.min(parseInt(limit, 10) || 12, 24); // cap to 24 just in case
+
+    // sort: highest rating first, break ties with most reviews
+    const products = await Product.find(q)
+      .sort({ rating: -1, numreviews: -1 })
+      .limit(l);
+
+    res.json(products);
+  } catch (error) {
+    console.error('TRENDING ERROR:', error);
+    res.status(500).json({ message: 'Server Error (trending)' });
   }
 });
 
