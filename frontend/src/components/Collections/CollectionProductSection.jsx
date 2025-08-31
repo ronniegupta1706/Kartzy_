@@ -1,5 +1,5 @@
 import React from 'react';
-import CollectionProductCard from './CollectionProductCard';
+import ProductCard from '../ProductCard';
 
 const CollectionProductSection = ({ title, products }) => {
   if (!products.length) return null;
@@ -9,7 +9,7 @@ const CollectionProductSection = ({ title, products }) => {
       <h2 className="text-xl font-bold mb-4">{title}</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {products.map((product) => (
-          <CollectionProductCard key={product._id} product={product} />
+          <ProductCard key={product._id} product={product} />
         ))}
       </div>
     </div>

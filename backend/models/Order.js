@@ -58,6 +58,10 @@ const orderSchema = new mongoose.Schema({
   {
     type:String
   },
+  cancelReason: {
+    type: String,
+    default: '',
+  },
 }, { timestamps: true });
 
 const Order = mongoose.model('Order', orderSchema);
